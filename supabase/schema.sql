@@ -1,0 +1,112 @@
+-- Run this once in your Supabase project's SQL Editor (Supabase dashboard -> SQL Editor -> New query).
+-- Creates the tables the admin panel reads/writes, seeds one settings row, sets up
+-- read-only public access, and creates the public photo storage bucket.
+
+create table if not exists projects (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  category text not null,
+  title text not null,
+  time text not null,
+  cost text not null,
+  tool text not null,
+  has3d boolean not null default false,
+  icon text not null default 'roll',
+  image_url text,
+  role text not null default '',
+  status text not null default 'Published',
+  tools text[] not null default '{}',
+  reviews jsonb not null default '[]'::jsonb,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists settings (
+  id integer primary key,
+  hero_name text not null default 'YEHIA EL MOHAMADY',
+  hero_disc text not null default 'MFG / MOLD DESIGN',
+  hero_rev text not null default '2026.01',
+  hero_prefix text not null default 'Design work that''s been ',
+  hero_emphasis text not null default 'built',
+  hero_suffix text not null default ', not just rendered.',
+  hero_lede text not null default 'A working register of mold design, reverse engineering, and mechanical projects — each one with the real numbers attached: time spent, cost, and the tools used to get there.',
+  stat_hours text not null default '342h',
+  stat_rating text not null default '4.9',
+  stat_cert_value text not null default 'CSWE',
+  stat_cert_label text not null default 'CERTIFIED 06.2025',
+  color_bg text not null default '#0B0E11',
+  color_panel text not null default '#1A1F26',
+  color_panel_hover text not null default '#20262E',
+  color_text text not null default '#E8E6E0',
+  color_text_dim text not null default '#6B7280',
+  color_accent text not null default '#FF6B35',
+  color_verified text not null default '#2DD4BF'
+);
+
+insert into settings (id) values (1)
+  on conflict (id) do nothing;
+
+-- Seed the 7 projects the site launched with, so editing them in the admin panel
+-- persists to real rows instead of the app's hardcoded fallback data.
+insert into projects (code, category, title, time, cost, tool, has3d, icon, role, status, tools, reviews, sort_order)
+values
+  ('PRJ-001', 'Plastic Injection', 'Replaceable Insert Seaming Roll', '96h', '$420', 'SW2024', true, 'roll',
+   'Mold Designer', 'Published', array['SolidWorks 2024', 'Mold Tools', 'Moldflow'],
+   '[
+     {"who": "R. Hassan, Mold Shop Lead", "quote": "Clean parting line strategy and the insert swap logic saved real tooling cost on the second revision."},
+     {"who": "A. Farouk, Production Engineer", "quote": "Documentation was thorough enough that manufacturing had zero clarifying questions."}
+   ]'::jsonb, 0),
+  ('PRJ-002', 'Mechanisms', 'Dental Chair Movement Linkage', '52h', '$0', 'SW2023', true, 'linkage',
+   'Mechanism Designer', 'Published', array['SolidWorks 2023', 'Motion Study'],
+   '[
+     {"who": "M. Adel, R&D Lead", "quote": "Motion range hit spec on the first physical prototype — the linkage geometry was dead on."},
+     {"who": "S. Nabil, Test Engineer", "quote": "Load cases were documented clearly enough to validate without re-deriving anything."}
+   ]'::jsonb, 1),
+  ('PRJ-003', 'Advanced Models', '6-Speed Gearbox Assembly', '70h', '$0', 'SW2024', false, 'gearbox',
+   'CAD Engineer', 'Published', array['SolidWorks 2024', 'Toolbox', 'GD&T'],
+   '[
+     {"who": "K. Osman, Instructor", "quote": "One of the cleanest full assemblies I have reviewed — mates are logical and rebuild fast."},
+     {"who": "D. Wael, Peer Reviewer", "quote": "Gear ratios and shaft alignment all check out against the reference spec."}
+   ]'::jsonb, 2),
+  ('PRJ-004', 'Reverse Engineering', 'CNC Spindle Housing Rebuild', '38h', '$180', 'GOM Scan', true, 'spindle',
+   'Reverse Engineer', 'Published', array['GOM Scan', 'SolidWorks', 'Mesh2Surface'],
+   '[
+     {"who": "T. Ibrahim, Shop Owner", "quote": "Scan-to-CAD deviation stayed under 0.1mm — the rebuilt housing dropped straight in."},
+     {"who": "N. Saleh, Machinist", "quote": "Tolerances on the bearing seats were spot on. No rework needed."}
+   ]'::jsonb, 3),
+  ('PRJ-005', 'Sheet Metal', 'Enclosure Bracket Family', '22h', '$60', 'SW2023', false, 'bracket',
+   'Sheet Metal Designer', 'Published', array['SolidWorks Sheet Metal', 'DXF Export'],
+   '[
+     {"who": "H. Zaki, Fabricator", "quote": "Flat patterns and bend allowances were correct — laser cut and folded with no adjustment."},
+     {"who": "L. Amin, Buyer", "quote": "The parametric family made re-sizing for the next SKU a five-minute job."}
+   ]'::jsonb, 4),
+  ('PRJ-006', 'Plastic Injection', 'Monitor Stand Core / Cavity Set', '64h', '$310', 'SW Mold', true, 'cavity',
+   'Mold Designer', 'Published', array['SolidWorks Mold Tools', 'Moldflow', 'DFM Review'],
+   '[
+     {"who": "F. Gamal, Tooling Lead", "quote": "Draft and shut-off surfaces were handled correctly the first time — rare on a part this size."},
+     {"who": "B. Youssef, Molder", "quote": "Cooling layout was thought through; cycle time came in under estimate."}
+   ]'::jsonb, 5),
+  ('PRJ-007', 'Mechanisms', 'Rotary Indexing Fixture', '30h', '$95', 'SW2024', false, 'fixture',
+   'Mechanism Designer', 'Published', array['SolidWorks 2024', 'Motion Study', 'GD&T'],
+   '[
+     {"who": "W. Kamal, Line Engineer", "quote": "Index repeatability held across a full shift — the detent design was the right call."},
+     {"who": "E. Sami, Operator", "quote": "Load and clamp cycle is fast and the part locates the same way every time."}
+   ]'::jsonb, 6)
+on conflict (code) do nothing;
+
+-- Row Level Security: anyone can read (the public site needs this via the anon key),
+-- nobody can write except the admin panel, which uses the service role key and
+-- therefore bypasses RLS entirely. Do not add insert/update/delete policies here.
+alter table projects enable row level security;
+alter table settings enable row level security;
+
+drop policy if exists "Public read access" on projects;
+create policy "Public read access" on projects for select using (true);
+
+drop policy if exists "Public read access" on settings;
+create policy "Public read access" on settings for select using (true);
+
+-- Public storage bucket for uploaded project photos.
+insert into storage.buckets (id, name, public)
+values ('project-photos', 'project-photos', true)
+on conflict (id) do nothing;

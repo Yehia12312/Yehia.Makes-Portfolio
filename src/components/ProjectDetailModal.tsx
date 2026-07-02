@@ -32,21 +32,28 @@ export function ProjectDetailModal({
         </div>
         <div className="detail-grid">
           <div className="viewer-stage">
-            <div style={{ textAlign: "center" }}>
-              <div className="viewer-model">
-                <WireIcon kind={project.icon} opacity={0.5} />
-              </div>
-              <div className="viewer-hint">
-                model-viewer renders here
-                <br />
-                (drag to rotate · scroll to zoom)
-              </div>
-            </div>
-            <div className="viewer-controls">
-              <span>⟲ ROTATE</span>
-              <span>⊕ ZOOM</span>
-              <span>⛶ FULLSCREEN</span>
-            </div>
+            {project.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={project.imageUrl} alt={project.title} className="viewer-photo" />
+            ) : (
+              <>
+                <div style={{ textAlign: "center" }}>
+                  <div className="viewer-model">
+                    <WireIcon kind={project.icon} opacity={0.5} />
+                  </div>
+                  <div className="viewer-hint">
+                    model-viewer renders here
+                    <br />
+                    (drag to rotate · scroll to zoom)
+                  </div>
+                </div>
+                <div className="viewer-controls">
+                  <span>⟲ ROTATE</span>
+                  <span>⊕ ZOOM</span>
+                  <span>⛶ FULLSCREEN</span>
+                </div>
+              </>
+            )}
           </div>
           <div className="sidebar">
             <div className="sidebar-block">

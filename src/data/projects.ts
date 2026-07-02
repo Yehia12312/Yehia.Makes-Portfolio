@@ -7,12 +7,23 @@ export type IconKind =
   | "cavity"
   | "fixture";
 
+export const ICON_KINDS: IconKind[] = [
+  "roll",
+  "linkage",
+  "gearbox",
+  "spindle",
+  "bracket",
+  "cavity",
+  "fixture",
+];
+
 export type Review = {
   who: string;
   quote: string;
 };
 
 export type Project = {
+  id: string;
   code: string;
   category: string;
   title: string;
@@ -21,10 +32,33 @@ export type Project = {
   tool: string;
   has3d: boolean;
   icon: IconKind;
+  imageUrl: string | null;
   role: string;
   status: string;
   tools: string[];
   reviews: Review[];
+  sortOrder: number;
+};
+
+export type SiteSettings = {
+  heroName: string;
+  heroDisc: string;
+  heroRev: string;
+  heroPrefix: string;
+  heroEmphasis: string;
+  heroSuffix: string;
+  heroLede: string;
+  statHours: string;
+  statRating: string;
+  statCertValue: string;
+  statCertLabel: string;
+  colorBg: string;
+  colorPanel: string;
+  colorPanelHover: string;
+  colorText: string;
+  colorTextDim: string;
+  colorAccent: string;
+  colorVerified: string;
 };
 
 export const CATEGORIES = [
@@ -36,8 +70,39 @@ export const CATEGORIES = [
   "SHEET METAL",
 ] as const;
 
-export const PROJECTS: Project[] = [
+export const PROJECT_CATEGORY_OPTIONS = [
+  "Plastic Injection",
+  "Reverse Engineering",
+  "Advanced Models",
+  "Mechanisms",
+  "Sheet Metal",
+] as const;
+
+export const DEFAULT_SETTINGS: SiteSettings = {
+  heroName: "YEHIA EL MOHAMADY",
+  heroDisc: "MFG / MOLD DESIGN",
+  heroRev: "2026.01",
+  heroPrefix: "Design work that's been ",
+  heroEmphasis: "built",
+  heroSuffix: ", not just rendered.",
+  heroLede:
+    "A working register of mold design, reverse engineering, and mechanical projects — each one with the real numbers attached: time spent, cost, and the tools used to get there.",
+  statHours: "342h",
+  statRating: "4.9",
+  statCertValue: "CSWE",
+  statCertLabel: "CERTIFIED 06.2025",
+  colorBg: "#0B0E11",
+  colorPanel: "#1A1F26",
+  colorPanelHover: "#20262E",
+  colorText: "#E8E6E0",
+  colorTextDim: "#6B7280",
+  colorAccent: "#FF6B35",
+  colorVerified: "#2DD4BF",
+};
+
+export const DEFAULT_PROJECTS: Project[] = [
   {
+    id: "PRJ-001",
     code: "PRJ-001",
     category: "Plastic Injection",
     title: "Replaceable Insert Seaming Roll",
@@ -46,9 +111,11 @@ export const PROJECTS: Project[] = [
     tool: "SW2024",
     has3d: true,
     icon: "roll",
+    imageUrl: null,
     role: "Mold Designer",
     status: "Published",
     tools: ["SolidWorks 2024", "Mold Tools", "Moldflow"],
+    sortOrder: 0,
     reviews: [
       {
         who: "R. Hassan, Mold Shop Lead",
@@ -63,6 +130,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-002",
     code: "PRJ-002",
     category: "Mechanisms",
     title: "Dental Chair Movement Linkage",
@@ -71,9 +139,11 @@ export const PROJECTS: Project[] = [
     tool: "SW2023",
     has3d: true,
     icon: "linkage",
+    imageUrl: null,
     role: "Mechanism Designer",
     status: "Published",
     tools: ["SolidWorks 2023", "Motion Study"],
+    sortOrder: 1,
     reviews: [
       {
         who: "M. Adel, R&D Lead",
@@ -88,6 +158,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-003",
     code: "PRJ-003",
     category: "Advanced Models",
     title: "6-Speed Gearbox Assembly",
@@ -96,9 +167,11 @@ export const PROJECTS: Project[] = [
     tool: "SW2024",
     has3d: false,
     icon: "gearbox",
+    imageUrl: null,
     role: "CAD Engineer",
     status: "Published",
     tools: ["SolidWorks 2024", "Toolbox", "GD&T"],
+    sortOrder: 2,
     reviews: [
       {
         who: "K. Osman, Instructor",
@@ -113,6 +186,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-004",
     code: "PRJ-004",
     category: "Reverse Engineering",
     title: "CNC Spindle Housing Rebuild",
@@ -121,9 +195,11 @@ export const PROJECTS: Project[] = [
     tool: "GOM Scan",
     has3d: true,
     icon: "spindle",
+    imageUrl: null,
     role: "Reverse Engineer",
     status: "Published",
     tools: ["GOM Scan", "SolidWorks", "Mesh2Surface"],
+    sortOrder: 3,
     reviews: [
       {
         who: "T. Ibrahim, Shop Owner",
@@ -137,6 +213,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-005",
     code: "PRJ-005",
     category: "Sheet Metal",
     title: "Enclosure Bracket Family",
@@ -145,9 +222,11 @@ export const PROJECTS: Project[] = [
     tool: "SW2023",
     has3d: false,
     icon: "bracket",
+    imageUrl: null,
     role: "Sheet Metal Designer",
     status: "Published",
     tools: ["SolidWorks Sheet Metal", "DXF Export"],
+    sortOrder: 4,
     reviews: [
       {
         who: "H. Zaki, Fabricator",
@@ -162,6 +241,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-006",
     code: "PRJ-006",
     category: "Plastic Injection",
     title: "Monitor Stand Core / Cavity Set",
@@ -170,9 +250,11 @@ export const PROJECTS: Project[] = [
     tool: "SW Mold",
     has3d: true,
     icon: "cavity",
+    imageUrl: null,
     role: "Mold Designer",
     status: "Published",
     tools: ["SolidWorks Mold Tools", "Moldflow", "DFM Review"],
+    sortOrder: 5,
     reviews: [
       {
         who: "F. Gamal, Tooling Lead",
@@ -187,6 +269,7 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "PRJ-007",
     code: "PRJ-007",
     category: "Mechanisms",
     title: "Rotary Indexing Fixture",
@@ -195,9 +278,11 @@ export const PROJECTS: Project[] = [
     tool: "SW2024",
     has3d: false,
     icon: "fixture",
+    imageUrl: null,
     role: "Mechanism Designer",
     status: "Published",
     tools: ["SolidWorks 2024", "Motion Study", "GD&T"],
+    sortOrder: 6,
     reviews: [
       {
         who: "W. Kamal, Line Engineer",
@@ -211,11 +296,4 @@ export const PROJECTS: Project[] = [
       },
     ],
   },
-];
-
-export const HERO_STATS = [
-  { num: String(PROJECTS.length).padStart(2, "0"), label: "PROJECTS LOGGED" },
-  { num: "342h", label: "TOTAL HOURS TRACKED" },
-  { num: "4.9", label: "AVG CLIENT RATING" },
-  { num: "CSWE", label: "CERTIFIED 06.2025" },
 ];

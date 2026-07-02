@@ -1,20 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CATEGORIES, PROJECTS, type Project } from "@/data/projects";
+import { CATEGORIES, type Project } from "@/data/projects";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectDetailModal } from "./ProjectDetailModal";
 
-export function Work() {
+export function Work({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState<(typeof CATEGORIES)[number]>("ALL");
   const [selected, setSelected] = useState<Project | null>(null);
 
   const filtered = useMemo(
     () =>
-      PROJECTS.filter(
+      projects.filter(
         (p) => filter === "ALL" || p.category.toUpperCase() === filter
       ),
-    [filter]
+    [filter, projects]
   );
 
   return (
@@ -31,7 +31,7 @@ export function Work() {
           </button>
         ))}
         <div className="filter-count">
-          SHOWING {filtered.length} / {PROJECTS.length}
+          SHOWING {filtered.length} / {projects.length}
         </div>
       </div>
 
@@ -41,7 +41,7 @@ export function Work() {
             <div className="empty-state">No projects logged in this category yet.</div>
           ) : (
             filtered.map((p) => (
-              <ProjectCard key={p.code} project={p} onOpen={() => setSelected(p)} />
+              <ProjectCard key={p.id} project={p} onOpen={() => setSelected(p)} />
             ))
           )}
         </div>

@@ -1,29 +1,34 @@
-import { HERO_STATS } from "@/data/projects";
+import type { SiteSettings } from "@/data/projects";
 
-export function Hero() {
+export function Hero({ settings, projectCount }: { settings: SiteSettings; projectCount: number }) {
+  const stats = [
+    { num: String(projectCount).padStart(2, "0"), label: "PROJECTS LOGGED" },
+    { num: settings.statHours, label: "TOTAL HOURS TRACKED" },
+    { num: settings.statRating, label: "AVG CLIENT RATING" },
+    { num: settings.statCertValue, label: settings.statCertLabel },
+  ];
+
   return (
     <section className="hero" id="about">
       <div className="title-block">
         <span>
-          NAME: <b>YEHIA EL MOHAMADY</b>
+          NAME: <b>{settings.heroName}</b>
         </span>
         <span>
-          DISC: <b>MFG / MOLD DESIGN</b>
+          DISC: <b>{settings.heroDisc}</b>
         </span>
         <span>
-          REV: <b>2026.01</b>
+          REV: <b>{settings.heroRev}</b>
         </span>
       </div>
       <h1>
-        Design work that&apos;s been <em>built</em>, not just rendered.
+        {settings.heroPrefix}
+        <em>{settings.heroEmphasis}</em>
+        {settings.heroSuffix}
       </h1>
-      <p className="lede">
-        A working register of mold design, reverse engineering, and mechanical
-        projects — each one with the real numbers attached: time spent, cost,
-        and the tools used to get there.
-      </p>
+      <p className="lede">{settings.heroLede}</p>
       <div className="hero-stats">
-        {HERO_STATS.map((stat) => (
+        {stats.map((stat) => (
           <div className="hero-stat" key={stat.label}>
             <div className="num">{stat.num}</div>
             <div className="label">{stat.label}</div>
