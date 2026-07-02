@@ -5,6 +5,7 @@ import { AdminSidebar } from "../AdminSidebar";
 import { ColorField } from "../ColorField";
 import { SubmitButton } from "../SubmitButton";
 import { NavLinksEditor } from "../NavLinksEditor";
+import { LogoField } from "../LogoField";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,16 @@ export default async function AdminSettingsPage({
           </div>
 
           <div className="admin-section-header" style={{ marginTop: 0 }}>
+            <h3>Logo</h3>
+          </div>
+          <LogoField
+            initialUrl={settings.logoUrl}
+            initialEnabled={settings.logoEnabled}
+            initialWidth={settings.logoWidth}
+            initialPosition={settings.logoPosition}
+          />
+
+          <div className="admin-section-header" style={{ marginTop: 12 }}>
             <h3>Navigation</h3>
           </div>
           <NavLinksEditor initial={settings.navLinks} />

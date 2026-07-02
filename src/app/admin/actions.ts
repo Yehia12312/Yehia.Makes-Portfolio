@@ -11,16 +11,21 @@ import {
   requireAdminSession,
 } from "@/lib/adminAuth";
 import {
+  createCategory,
   createMediaUploadTicket,
   createProject,
   createSection,
   deleteBooking,
+  deleteCategory,
   deleteLead,
   deleteProject,
   deleteSection,
+  moveCategory,
   moveProject,
   moveSection,
+  renameCategory,
   setLeadStatus,
+  toggleCategory,
   updateProject,
   updateProjectMedia,
   updateSection,
@@ -87,6 +92,7 @@ function parseProjectInput(formData: FormData): ProjectInput {
     status: String(formData.get("status") ?? "").trim(),
     tools,
     reviews,
+    featured: formData.get("featured") === "on",
   };
 }
 
@@ -123,6 +129,7 @@ export async function saveProjectAction(formData: FormData): Promise<void> {
   await updateProjectMedia(projectId, { images, modelUrl });
 
   revalidatePath("/");
+  revalidatePath("/projects");
   revalidatePath("/admin/projects");
   redirect("/admin/projects");
 }
@@ -133,6 +140,7 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (id) await deleteProject(id);
   revalidatePath("/");
+  revalidatePath("/projects");
   revalidatePath("/admin/projects");
 }
 
@@ -143,6 +151,7 @@ export async function moveProjectAction(formData: FormData): Promise<void> {
   const direction = formData.get("direction") === "up" ? "up" : "down";
   if (id) await moveProject(id, direction);
   revalidatePath("/");
+  revalidatePath("/projects");
   revalidatePath("/admin/projects");
 }
 
@@ -172,10 +181,15 @@ export async function saveSettingsAction(formData: FormData): Promise<void> {
     navLinks: parseNavLinks(formData),
     navCtaLabel: String(formData.get("navCtaLabel") ?? ""),
     navCtaAnchor: String(formData.get("navCtaAnchor") ?? ""),
+    logoUrl: String(formData.get("logoUrl") ?? "").trim() || null,
+    logoEnabled: formData.get("logoEnabled") === "on",
+    logoWidth: Number(formData.get("logoWidth")) || 28,
+    logoPosition: formData.get("logoPosition") === "after" ? "after" : "before",
   };
 
   await updateSettings(settings);
   revalidatePath("/");
+  revalidatePath("/projects");
   revalidatePath("/admin/settings");
   redirect("/admin/settings?saved=1");
 }
@@ -297,4 +311,54 @@ export async function deleteBookingAction(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (id) await deleteBooking(id);
   revalidatePath("/admin/bookings");
+}
+
+function revalidateCategoryPaths(): void {
+  revalidatePath("/");
+  revalidatePath("/projects");
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/projects");
+}
+
+export async function addCategoryAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const name = String(formData.get("name") ?? "").trim();
+  if (name) await createCategory(name);
+  revalidateCategoryPaths();
+}
+
+export async function renameCategoryAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (id && name) await renameCategory(id, name);
+  revalidateCategoryPaths();
+}
+
+export async function toggleCategoryAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const enabled = formData.get("enabled") === "on";
+  if (id) await toggleCategory(id, enabled);
+  revalidateCategoryPaths();
+}
+
+export async function moveCategoryAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const direction = formData.get("direction") === "up" ? "up" : "down";
+  if (id) await moveCategory(id, direction);
+  revalidateCategoryPaths();
+}
+
+export async function deleteCategoryAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  if (id) await deleteCategory(id);
+  revalidateCategoryPaths();
 }

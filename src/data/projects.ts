@@ -38,9 +38,12 @@ export type Project = {
   tools: string[];
   reviews: Review[];
   sortOrder: number;
+  featured: boolean;
 };
 
 export type NavLink = { label: string; anchor: string };
+
+export type LogoPosition = "before" | "after";
 
 export type SiteSettings = {
   heroName: string;
@@ -64,6 +67,17 @@ export type SiteSettings = {
   navLinks: NavLink[];
   navCtaLabel: string;
   navCtaAnchor: string;
+  logoUrl: string | null;
+  logoEnabled: boolean;
+  logoWidth: number;
+  logoPosition: LogoPosition;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  sortOrder: number;
 };
 
 export const CATEGORIES = [
@@ -110,7 +124,18 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   ],
   navCtaLabel: "SCHEDULE CALL →",
   navCtaAnchor: "contact",
+  logoUrl: null,
+  logoEnabled: false,
+  logoWidth: 28,
+  logoPosition: "before",
 };
+
+export const DEFAULT_CATEGORIES: Category[] = PROJECT_CATEGORY_OPTIONS.map((name, i) => ({
+  id: name,
+  name,
+  enabled: true,
+  sortOrder: i,
+}));
 
 export const DEFAULT_PROJECTS: Project[] = [
   {
@@ -128,6 +153,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks 2024", "Mold Tools", "Moldflow"],
     sortOrder: 0,
+    featured: true,
     reviews: [
       {
         who: "R. Hassan, Mold Shop Lead",
@@ -156,6 +182,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks 2023", "Motion Study"],
     sortOrder: 1,
+    featured: true,
     reviews: [
       {
         who: "M. Adel, R&D Lead",
@@ -184,6 +211,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks 2024", "Toolbox", "GD&T"],
     sortOrder: 2,
+    featured: true,
     reviews: [
       {
         who: "K. Osman, Instructor",
@@ -212,6 +240,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["GOM Scan", "SolidWorks", "Mesh2Surface"],
     sortOrder: 3,
+    featured: false,
     reviews: [
       {
         who: "T. Ibrahim, Shop Owner",
@@ -239,6 +268,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks Sheet Metal", "DXF Export"],
     sortOrder: 4,
+    featured: false,
     reviews: [
       {
         who: "H. Zaki, Fabricator",
@@ -267,6 +297,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks Mold Tools", "Moldflow", "DFM Review"],
     sortOrder: 5,
+    featured: false,
     reviews: [
       {
         who: "F. Gamal, Tooling Lead",
@@ -295,6 +326,7 @@ export const DEFAULT_PROJECTS: Project[] = [
     status: "Published",
     tools: ["SolidWorks 2024", "Motion Study", "GD&T"],
     sortOrder: 6,
+    featured: false,
     reviews: [
       {
         who: "W. Kamal, Line Engineer",

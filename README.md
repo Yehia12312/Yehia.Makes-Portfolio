@@ -1,6 +1,6 @@
 # Yehia.Makes — Portfolio
 
-Next.js implementation of the `Yehia.Makes` portfolio design: nav, hero, filterable project grid, project detail overlay, and a contact section with a real contact form + real call scheduling.
+Next.js implementation of the `Yehia.Makes` portfolio design: nav, hero, a full-width filterable project list, project detail overlay, and a contact section with a real contact form + real call scheduling.
 
 ## Getting started
 
@@ -68,9 +68,10 @@ Until these are set, `/admin` still loads but shows a "Supabase isn't connected 
 Visit `yoursite.com/admin` and log in with `ADMIN_PASSWORD`. Everything lives behind a permanent sidebar, each area on its own page:
 - **Dashboard** (`/admin`) — an overview of new leads, upcoming calls, and site traffic (see below).
 - **Leads** (`/admin/leads`) and **Bookings** (`/admin/bookings`) — every contact form submission and confirmed call, in one inbox (see below).
-- **Projects** (`/admin/projects`) — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
+- **Projects** (`/admin/projects`) — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery, an optional 3D model file, and a "featured on homepage" flag per project (see below).
+- **Categories** (`/admin/categories`) — add new project categories and show/hide existing ones (see below).
 - **Site Sections** (`/admin/sections`) — toggle sections on/off and reorder them, and add new Testimonials / Stats Band / About-Text sections anywhere on the page (see below).
-- **Nav, Hero & Colors** (`/admin/settings`) — the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
+- **Nav, Hero & Colors** (`/admin/settings`) — the logo, the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
 
 Changes save immediately and show up on the live site on the next page load — no redeploy needed.
 
@@ -102,3 +103,20 @@ The admin panel now works like a lightweight version of a Shopify-style dashboar
 Visit tracking is minimal and self-hosted — no cookies, no third-party analytics, just a page path and timestamp logged per page load (and per project detail view) into your own Supabase project.
 
 **If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds the new `leads`, `bookings`, and `page_views` tables and is safe to run any time.
+
+### Featured projects, the full Projects page, and categories
+
+The homepage no longer shows every project in a grid. Instead:
+- The homepage's "Selected Work" section shows up to 3 **featured** projects (check "FEATURED ON HOMEPAGE" when editing a project, in `/admin/projects`), full-width, stacked one under the other — not a grid. If nothing is marked featured yet, it falls back to showing your first 3 projects.
+- A **"VIEW ALL PROJECTS →"** button below that takes visitors to a new `/projects` page listing every project (also full-width, stacked), with the category filter chips.
+- **Categories** (`/admin/categories`) are now yours to manage: add a new one any time, and show/hide existing ones from the public filter bar without affecting projects already assigned to them (a hidden category still displays normally on any project that has it — it just won't appear as a filter chip for new browsing). Reorder them to control the order chips appear in.
+
+The whole site (homepage, `/projects`, and the admin panel) is also fully responsive now, including a mobile nav menu (tap the ☰ icon).
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds a `featured` column to `projects` and a new `categories` table (seeded with your 5 existing categories) and is safe to run any time.
+
+### Logo control
+
+Under **Nav, Hero & Colors → Logo**, you can upload an image to show beside "YEHIA.MAKES" in the nav (off by default — matches the site's original text-only look), control its width in pixels, and choose whether it sits before or after the text.
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds the logo columns to `settings` and is safe to run any time.

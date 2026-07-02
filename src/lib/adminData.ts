@@ -38,6 +38,7 @@ export type ProjectInput = {
   status: string;
   tools: string[];
   reviews: Review[];
+  featured: boolean;
 };
 
 function toRow(input: ProjectInput) {
@@ -53,6 +54,7 @@ function toRow(input: ProjectInput) {
     status: input.status,
     tools: input.tools,
     reviews: input.reviews,
+    featured: input.featured,
   };
 }
 
@@ -182,12 +184,76 @@ const STRING_SETTINGS_COLUMNS: Record<string, keyof SiteSettings> = {
 
 export async function updateSettings(settings: SiteSettings) {
   const supabase = getSupabaseAdmin();
-  const row: Record<string, string | SiteSettings["navLinks"]> = { nav_links: settings.navLinks };
+  const row: Record<string, string | number | boolean | null | SiteSettings["navLinks"]> = {
+    nav_links: settings.navLinks,
+    logo_url: settings.logoUrl,
+    logo_enabled: settings.logoEnabled,
+    logo_width: settings.logoWidth,
+    logo_position: settings.logoPosition,
+  };
   for (const [column, key] of Object.entries(STRING_SETTINGS_COLUMNS)) {
     row[column] = settings[key] as string;
   }
   const { error } = await supabase.from("settings").upsert({ id: 1, ...row }, { onConflict: "id" });
   if (error) throw new Error(error.message);
+}
+
+export async function listCategoriesAdmin() {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("categories").select("*").order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function createCategory(name: string) {
+  const supabase = getSupabaseAdmin();
+  const { data: maxRow } = await supabase
+    .from("categories")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextSortOrder = (maxRow?.sort_order ?? -1) + 1;
+
+  const { error } = await supabase.from("categories").insert({ name, sort_order: nextSortOrder, enabled: true });
+  if (error) throw new Error(error.message);
+}
+
+export async function renameCategory(id: string, name: string) {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("categories").update({ name }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function toggleCategory(id: string, enabled: boolean) {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("categories").update({ enabled }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteCategory(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function moveCategory(id: string, direction: "up" | "down") {
+  const supabase = getSupabaseAdmin();
+  const { data: rows, error } = await supabase
+    .from("categories")
+    .select("id, sort_order")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  if (!rows) return;
+
+  const index = rows.findIndex((r) => r.id === id);
+  const swapWith = direction === "up" ? index - 1 : index + 1;
+  if (index === -1 || swapWith < 0 || swapWith >= rows.length) return;
+
+  const a = rows[index];
+  const b = rows[swapWith];
+  await supabase.from("categories").update({ sort_order: b.sort_order }).eq("id", a.id);
+  await supabase.from("categories").update({ sort_order: a.sort_order }).eq("id", b.id);
 }
 
 export async function listSectionsAdmin() {

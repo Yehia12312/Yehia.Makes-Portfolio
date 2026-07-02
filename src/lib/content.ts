@@ -1,5 +1,13 @@
 import { getSupabasePublic, isSupabaseConfigured } from "./supabase";
-import { DEFAULT_PROJECTS, DEFAULT_SETTINGS, type NavLink, type Project, type SiteSettings } from "@/data/projects";
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_PROJECTS,
+  DEFAULT_SETTINGS,
+  type Category,
+  type NavLink,
+  type Project,
+  type SiteSettings,
+} from "@/data/projects";
 import { DEFAULT_SECTIONS, type Section, type SectionType } from "@/data/sections";
 
 type ProjectRow = {
@@ -17,6 +25,14 @@ type ProjectRow = {
   status: string;
   tools: string[];
   reviews: Project["reviews"];
+  sort_order: number;
+  featured: boolean;
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  enabled: boolean;
   sort_order: number;
 };
 
@@ -42,6 +58,10 @@ type SettingsRow = {
   nav_links: NavLink[];
   nav_cta_label: string;
   nav_cta_anchor: string;
+  logo_url: string | null;
+  logo_enabled: boolean;
+  logo_width: number;
+  logo_position: SiteSettings["logoPosition"];
 };
 
 type SectionRow = {
@@ -70,6 +90,16 @@ function rowToProject(row: ProjectRow): Project {
     tools: row.tools ?? [],
     reviews: row.reviews ?? [],
     sortOrder: row.sort_order,
+    featured: row.featured ?? false,
+  };
+}
+
+function rowToCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    name: row.name,
+    enabled: row.enabled,
+    sortOrder: row.sort_order,
   };
 }
 
@@ -96,6 +126,10 @@ function rowToSettings(row: SettingsRow): SiteSettings {
     navLinks: row.nav_links ?? [],
     navCtaLabel: row.nav_cta_label,
     navCtaAnchor: row.nav_cta_anchor,
+    logoUrl: row.logo_url,
+    logoEnabled: row.logo_enabled,
+    logoWidth: row.logo_width,
+    logoPosition: row.logo_position,
   };
 }
 
@@ -138,6 +172,22 @@ export async function getSettings(): Promise<SiteSettings> {
     return rowToSettings(data as SettingsRow);
   } catch {
     return DEFAULT_SETTINGS;
+  }
+}
+
+export async function getCategories(): Promise<Category[]> {
+  if (!isSupabaseConfigured) return DEFAULT_CATEGORIES;
+  try {
+    const supabase = getSupabasePublic();
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("enabled", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data || data.length === 0) return DEFAULT_CATEGORIES;
+    return (data as CategoryRow[]).map(rowToCategory);
+  } catch {
+    return DEFAULT_CATEGORIES;
   }
 }
 

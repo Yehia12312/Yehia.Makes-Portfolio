@@ -9,7 +9,7 @@ export function ProjectCard({
   onOpen: () => void;
 }) {
   return (
-    <button type="button" className="card" onClick={onOpen}>
+    <button type="button" className="card card-row" onClick={onOpen}>
       <div className="card-thumb">
         <span className="card-tag">{project.code}</span>
         {project.modelUrl && <span className="card-3d-badge">● 3D</span>}

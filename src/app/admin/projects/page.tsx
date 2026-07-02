@@ -44,6 +44,7 @@ export default async function AdminProjectsPage() {
                 <div className="admin-row-main">
                   <div className="admin-row-code">
                     {p.code}
+                    {p.featured && <span className="admin-row-3d-badge"> · ★ FEATURED</span>}
                     {p.modelUrl && <span className="admin-row-3d-badge"> · 3D MODEL</span>}
                     {p.images.length > 1 && <span> · {p.images.length} PHOTOS</span>}
                   </div>

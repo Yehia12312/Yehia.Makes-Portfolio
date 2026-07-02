@@ -1,8 +1,21 @@
 import { isSupabaseAdminConfigured } from "@/lib/supabase";
+import { listCategoriesAdmin } from "@/lib/adminData";
+import { DEFAULT_CATEGORIES, type Category } from "@/data/projects";
 import { AdminSidebar } from "../../AdminSidebar";
 import { ProjectForm } from "../ProjectForm";
 
-export default function NewProjectPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewProjectPage() {
+  const categories: Category[] = isSupabaseAdminConfigured
+    ? (await listCategoriesAdmin()).map((c) => ({
+        id: c.id as string,
+        name: c.name as string,
+        enabled: c.enabled as boolean,
+        sortOrder: c.sort_order as number,
+      }))
+    : DEFAULT_CATEGORIES;
+
   return (
     <div className="admin-shell">
       <AdminSidebar active="projects" />
@@ -13,7 +26,7 @@ export default function NewProjectPage() {
             SUPABASE_SERVICE_ROLE_KEY to your environment first (see README).
           </div>
         )}
-        <ProjectForm />
+        <ProjectForm categories={categories} />
       </div>
     </div>
   );

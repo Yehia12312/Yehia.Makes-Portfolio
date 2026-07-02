@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getProjects } from "@/lib/content";
 import { isSupabaseAdminConfigured } from "@/lib/supabase";
+import { listCategoriesAdmin } from "@/lib/adminData";
+import { DEFAULT_CATEGORIES, type Category } from "@/data/projects";
 import { AdminSidebar } from "../../AdminSidebar";
 import { ProjectForm } from "../ProjectForm";
 
@@ -8,7 +10,19 @@ export const dynamic = "force-dynamic";
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const projects = await getProjects();
+  const [projects, categories] = await Promise.all([
+    getProjects(),
+    isSupabaseAdminConfigured
+      ? listCategoriesAdmin().then((rows) =>
+          rows.map((c) => ({
+            id: c.id as string,
+            name: c.name as string,
+            enabled: c.enabled as boolean,
+            sortOrder: c.sort_order as number,
+          }))
+        )
+      : Promise.resolve<Category[]>(DEFAULT_CATEGORIES),
+  ]);
   const project = projects.find((p) => p.id === id);
 
   if (!project) notFound();
@@ -23,7 +37,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
             SUPABASE_SERVICE_ROLE_KEY to your environment first (see README).
           </div>
         )}
-        <ProjectForm project={project} />
+        <ProjectForm project={project} categories={categories} />
       </div>
     </div>
   );

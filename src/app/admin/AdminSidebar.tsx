@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "./actions";
 
-type AdminSection = "dashboard" | "leads" | "bookings" | "projects" | "sections" | "settings";
+type AdminSection = "dashboard" | "leads" | "bookings" | "projects" | "categories" | "sections" | "settings";
 
 const NAV_GROUPS: { label: string; items: { href: string; section: AdminSection; label: string }[] }[] = [
   {
@@ -19,6 +19,7 @@ const NAV_GROUPS: { label: string; items: { href: string; section: AdminSection;
     label: "Content",
     items: [
       { href: "/admin/projects", section: "projects", label: "Projects" },
+      { href: "/admin/categories", section: "categories", label: "Categories" },
       { href: "/admin/sections", section: "sections", label: "Site Sections" },
       { href: "/admin/settings", section: "settings", label: "Nav, Hero & Colors" },
     ],

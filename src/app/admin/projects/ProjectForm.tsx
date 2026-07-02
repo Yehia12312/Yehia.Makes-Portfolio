@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { ICON_KINDS, PROJECT_CATEGORY_OPTIONS, type Project } from "@/data/projects";
+import { ICON_KINDS, type Category, type Project } from "@/data/projects";
 import { createMediaUploadTicketAction, saveProjectAction } from "../actions";
 
 type ListItem<T> = T & { key: string };
@@ -38,7 +38,7 @@ async function uploadFile(file: File): Promise<string> {
   return publicUrl;
 }
 
-export function ProjectForm({ project }: { project?: Project }) {
+export function ProjectForm({ project, categories }: { project?: Project; categories: Category[] }) {
   const [tools, addTool, removeTool] = useKeyedList<{ value: string }>(
     (project?.tools ?? [""]).map((value) => ({ value }))
   );
@@ -145,10 +145,11 @@ export function ProjectForm({ project }: { project?: Project }) {
         </div>
         <div className="form-field">
           <label>CATEGORY</label>
-          <select name="category" defaultValue={project?.category ?? PROJECT_CATEGORY_OPTIONS[0]} required>
-            {PROJECT_CATEGORY_OPTIONS.map((c) => (
-              <option key={c} value={c}>
-                {c}
+          <select name="category" defaultValue={project?.category ?? categories[0]?.name} required>
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+                {!c.enabled ? " (hidden)" : ""}
               </option>
             ))}
           </select>
@@ -194,6 +195,22 @@ export function ProjectForm({ project }: { project?: Project }) {
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="form-field">
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            type="checkbox"
+            name="featured"
+            defaultChecked={project?.featured ?? false}
+            style={{ width: "auto" }}
+          />
+          FEATURED ON HOMEPAGE
+        </label>
+        <p className="admin-hint" style={{ margin: "4px 0 0" }}>
+          Only the first 3 featured projects (in project order above) appear on the homepage. The
+          rest are still visible on the full Projects page.
+        </p>
       </div>
 
       <div className="form-field">
