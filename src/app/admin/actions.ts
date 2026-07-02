@@ -11,13 +11,13 @@ import {
   requireAdminSession,
 } from "@/lib/adminAuth";
 import {
+  createPhotoUploadTicket,
   createProject,
   deleteProject,
   moveProject,
   setProjectPhoto,
   updateProject,
   updateSettings,
-  uploadProjectPhoto,
   type ProjectInput,
 } from "@/lib/adminData";
 import { isSupabaseAdminConfigured } from "@/lib/supabase";
@@ -77,6 +77,21 @@ function parseProjectInput(formData: FormData): ProjectInput {
   };
 }
 
+/**
+ * Called directly from the client (not as a <form action>) before the rest of
+ * the project form submits, so the photo bytes go straight from the browser
+ * to Supabase Storage instead of through this server.
+ */
+export async function createPhotoUploadTicketAction(
+  fileName: string
+): Promise<{ signedUrl: string; publicUrl: string }> {
+  await requireAdminSession();
+  if (!isSupabaseAdminConfigured) {
+    throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+  }
+  return createPhotoUploadTicket(fileName);
+}
+
 export async function saveProjectAction(formData: FormData): Promise<void> {
   await requireAdminSession();
   if (!isSupabaseAdminConfigured) {
@@ -94,10 +109,9 @@ export async function saveProjectAction(formData: FormData): Promise<void> {
     projectId = created.id;
   }
 
-  const photo = formData.get("photo");
-  if (photo instanceof File && photo.size > 0) {
-    const url = await uploadProjectPhoto(photo);
-    await setProjectPhoto(projectId, url);
+  const imageUrl = String(formData.get("imageUrl") ?? "").trim();
+  if (imageUrl) {
+    await setProjectPhoto(projectId, imageUrl);
   } else if (formData.get("removePhoto") === "on") {
     await setProjectPhoto(projectId, null);
   }
@@ -154,4 +168,5 @@ export async function saveSettingsAction(formData: FormData): Promise<void> {
   await updateSettings(settings);
   revalidatePath("/");
   revalidatePath("/admin");
+  redirect("/admin?saved=1");
 }

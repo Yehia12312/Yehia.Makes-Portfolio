@@ -107,16 +107,26 @@ export async function moveProject(id: string, direction: "up" | "down") {
   await supabase.from("projects").update({ sort_order: a.sort_order }).eq("id", b.id);
 }
 
-export async function uploadProjectPhoto(file: File): Promise<string> {
+/**
+ * Photos upload directly from the browser to Supabase Storage (not through this
+ * server's Server Actions), because Vercel serverless functions cap request
+ * bodies at a few MB — too small for real photos. This issues a one-time signed
+ * URL the browser can PUT the file to directly.
+ */
+export async function createPhotoUploadTicket(
+  originalName: string
+): Promise<{ signedUrl: string; publicUrl: string }> {
   const supabase = getSupabaseAdmin();
-  const ext = file.name.split(".").pop() || "jpg";
+  const ext = originalName.split(".").pop() || "jpg";
   const path = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
+
+  const { data, error } = await supabase.storage
     .from(PROJECT_PHOTOS_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false });
+    .createSignedUploadUrl(path);
   if (error) throw new Error(error.message);
-  const { data } = supabase.storage.from(PROJECT_PHOTOS_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+
+  const { data: publicData } = supabase.storage.from(PROJECT_PHOTOS_BUCKET).getPublicUrl(path);
+  return { signedUrl: data.signedUrl, publicUrl: publicData.publicUrl };
 }
 
 const SETTINGS_COLUMNS: Record<keyof SiteSettings, string> = {
@@ -146,6 +156,6 @@ export async function updateSettings(settings: SiteSettings) {
   for (const key of Object.keys(SETTINGS_COLUMNS) as (keyof SiteSettings)[]) {
     row[SETTINGS_COLUMNS[key]] = settings[key];
   }
-  const { error } = await supabase.from("settings").upsert({ id: 1, ...row });
+  const { error } = await supabase.from("settings").upsert({ id: 1, ...row }, { onConflict: "id" });
   if (error) throw new Error(error.message);
 }

@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { ICON_KINDS, PROJECT_CATEGORY_OPTIONS, type Project } from "@/data/projects";
-import { saveProjectAction } from "../actions";
+import { createPhotoUploadTicketAction, saveProjectAction } from "../actions";
 
 type ListItem<T> = T & { key: string };
 
@@ -24,9 +25,49 @@ export function ProjectForm({ project }: { project?: Project }) {
   const [reviews, addReview, removeReview] = useKeyedList<{ who: string; quote: string }>(
     project?.reviews && project.reviews.length > 0 ? project.reviews : [{ who: "", quote: "" }]
   );
+  const [status, setStatus] = useState<"idle" | "uploading" | "saving">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const photo = formData.get("photo");
+    formData.delete("photo");
+
+    if (photo instanceof File && photo.size > 0) {
+      setStatus("uploading");
+      try {
+        const { signedUrl, publicUrl } = await createPhotoUploadTicketAction(photo.name);
+        const res = await fetch(signedUrl, {
+          method: "PUT",
+          body: photo,
+          headers: { "Content-Type": photo.type || "application/octet-stream" },
+        });
+        if (!res.ok) throw new Error("Photo upload failed — try a smaller image.");
+        formData.set("imageUrl", publicUrl);
+      } catch (err) {
+        setStatus("idle");
+        setError(err instanceof Error ? err.message : "Photo upload failed.");
+        return;
+      }
+    }
+
+    setStatus("saving");
+    try {
+      await saveProjectAction(formData);
+    } catch (err) {
+      unstable_rethrow(err); // saveProjectAction redirects on success — let that navigation through
+      setStatus("idle");
+      setError(err instanceof Error ? err.message : "Save failed.");
+    }
+  }
+
+  const busy = status !== "idle";
 
   return (
-    <form action={saveProjectAction} className="admin-section">
+    <form onSubmit={handleSubmit} className="admin-section">
       {project && <input type="hidden" name="id" value={project.id} />}
 
       <div className="admin-section-header">
@@ -35,11 +76,13 @@ export function ProjectForm({ project }: { project?: Project }) {
           <Link href="/admin" className="admin-btn">
             CANCEL
           </Link>
-          <button type="submit" className="admin-btn admin-btn-accent">
-            SAVE PROJECT
+          <button type="submit" className="admin-btn admin-btn-accent" disabled={busy}>
+            {status === "uploading" ? "UPLOADING PHOTO…" : status === "saving" ? "SAVING…" : "SAVE PROJECT"}
           </button>
         </div>
       </div>
+
+      {error && <div className="form-error">{error}</div>}
 
       <div className="admin-grid-2">
         <div className="form-field">

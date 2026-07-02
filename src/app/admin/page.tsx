@@ -4,11 +4,19 @@ import { isSupabaseAdminConfigured } from "@/lib/supabase";
 import { deleteProjectAction, logoutAction, moveProjectAction, saveSettingsAction } from "./actions";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 import { ColorField } from "./ColorField";
+import { SubmitButton } from "./SubmitButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
-  const [projects, settings] = await Promise.all([getProjects(), getSettings()]);
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const [[projects, settings], { saved }] = await Promise.all([
+    Promise.all([getProjects(), getSettings()]),
+    searchParams,
+  ]);
 
   return (
     <div className="admin-shell">
@@ -36,6 +44,12 @@ export default async function AdminPage() {
           Supabase isn&apos;t connected yet — you&apos;re viewing the built-in default content, and
           nothing you edit below will save. Add SUPABASE_URL, SUPABASE_ANON_KEY, and
           SUPABASE_SERVICE_ROLE_KEY to your environment (see README).
+        </div>
+      )}
+
+      {saved && (
+        <div className="form-sent" style={{ margin: "24px 48px 0" }}>
+          ✓ Saved — your live site now reflects these changes.
         </div>
       )}
 
@@ -97,9 +111,9 @@ export default async function AdminPage() {
       <form action={saveSettingsAction} className="admin-section">
         <div className="admin-section-header">
           <h2>Hero &amp; Text</h2>
-          <button type="submit" className="admin-btn admin-btn-accent">
+          <SubmitButton pendingLabel="SAVING…" className="admin-btn admin-btn-accent">
             SAVE
-          </button>
+          </SubmitButton>
         </div>
 
         <div className="admin-grid-2">
