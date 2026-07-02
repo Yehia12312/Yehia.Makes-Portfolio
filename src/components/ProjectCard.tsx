@@ -12,10 +12,10 @@ export function ProjectCard({
     <button type="button" className="card" onClick={onOpen}>
       <div className="card-thumb">
         <span className="card-tag">{project.code}</span>
-        {project.has3d && <span className="card-3d-badge">● 3D</span>}
-        {project.imageUrl ? (
+        {project.modelUrl && <span className="card-3d-badge">● 3D</span>}
+        {project.images[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={project.imageUrl} alt="" className="card-thumb-img" />
+          <img src={project.images[0]} alt="" className="card-thumb-img" />
         ) : (
           <WireIcon kind={project.icon} className="wireframe-icon" />
         )}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { ICON_KINDS, PROJECT_CATEGORY_OPTIONS, type Project } from "@/data/projects";
-import { createPhotoUploadTicketAction, saveProjectAction } from "../actions";
+import { createMediaUploadTicketAction, saveProjectAction } from "../actions";
 
 type ListItem<T> = T & { key: string };
 
@@ -18,6 +18,26 @@ function useKeyedList<T>(initial: T[]): [ListItem<T>[], (item: T) => void, (key:
   return [items, add, remove];
 }
 
+type ImageItem =
+  | { key: string; kind: "existing"; url: string }
+  | { key: string; kind: "new"; file: File; previewUrl: string };
+
+type ModelItem =
+  | { kind: "existing"; url: string }
+  | { kind: "new"; file: File; name: string }
+  | null;
+
+async function uploadFile(file: File): Promise<string> {
+  const { signedUrl, publicUrl } = await createMediaUploadTicketAction(file.name);
+  const res = await fetch(signedUrl, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+  });
+  if (!res.ok) throw new Error(`Upload failed for ${file.name} — try a smaller file.`);
+  return publicUrl;
+}
+
 export function ProjectForm({ project }: { project?: Project }) {
   const [tools, addTool, removeTool] = useKeyedList<{ value: string }>(
     (project?.tools ?? [""]).map((value) => ({ value }))
@@ -25,6 +45,41 @@ export function ProjectForm({ project }: { project?: Project }) {
   const [reviews, addReview, removeReview] = useKeyedList<{ who: string; quote: string }>(
     project?.reviews && project.reviews.length > 0 ? project.reviews : [{ who: "", quote: "" }]
   );
+
+  const imageCounter = useRef(project?.images?.length ?? 0);
+  const [images, setImages] = useState<ImageItem[]>(
+    (project?.images ?? []).map((url, i) => ({ key: `existing-${i}`, kind: "existing", url }))
+  );
+  const [model, setModel] = useState<ModelItem>(project?.modelUrl ? { kind: "existing", url: project.modelUrl } : null);
+
+  useEffect(() => {
+    return () => {
+      for (const img of images) {
+        if (img.kind === "new") URL.revokeObjectURL(img.previewUrl);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function addImageFiles(fileList: FileList | null) {
+    if (!fileList) return;
+    const newItems: ImageItem[] = Array.from(fileList).map((file) => ({
+      key: `new-${imageCounter.current++}`,
+      kind: "new",
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newItems]);
+  }
+
+  function removeImage(key: string) {
+    setImages((prev) => {
+      const target = prev.find((i) => i.key === key);
+      if (target?.kind === "new") URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((i) => i.key !== key);
+    });
+  }
+
   const [status, setStatus] = useState<"idle" | "uploading" | "saving">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -33,25 +88,24 @@ export function ProjectForm({ project }: { project?: Project }) {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const photo = formData.get("photo");
-    formData.delete("photo");
 
-    if (photo instanceof File && photo.size > 0) {
-      setStatus("uploading");
-      try {
-        const { signedUrl, publicUrl } = await createPhotoUploadTicketAction(photo.name);
-        const res = await fetch(signedUrl, {
-          method: "PUT",
-          body: photo,
-          headers: { "Content-Type": photo.type || "application/octet-stream" },
-        });
-        if (!res.ok) throw new Error("Photo upload failed — try a smaller image.");
-        formData.set("imageUrl", publicUrl);
-      } catch (err) {
-        setStatus("idle");
-        setError(err instanceof Error ? err.message : "Photo upload failed.");
-        return;
+    try {
+      if (images.some((i) => i.kind === "new") || (model && model.kind === "new")) {
+        setStatus("uploading");
       }
+
+      const finalImageUrls: string[] = [];
+      for (const img of images) {
+        finalImageUrls.push(img.kind === "existing" ? img.url : await uploadFile(img.file));
+      }
+      for (const url of finalImageUrls) formData.append("images", url);
+
+      const finalModelUrl = model ? (model.kind === "existing" ? model.url : await uploadFile(model.file)) : "";
+      formData.set("modelUrl", finalModelUrl);
+    } catch (err) {
+      setStatus("idle");
+      setError(err instanceof Error ? err.message : "Upload failed.");
+      return;
     }
 
     setStatus("saving");
@@ -77,7 +131,7 @@ export function ProjectForm({ project }: { project?: Project }) {
             CANCEL
           </Link>
           <button type="submit" className="admin-btn admin-btn-accent" disabled={busy}>
-            {status === "uploading" ? "UPLOADING PHOTO…" : status === "saving" ? "SAVING…" : "SAVE PROJECT"}
+            {status === "uploading" ? "UPLOADING…" : status === "saving" ? "SAVING…" : "SAVE PROJECT"}
           </button>
         </div>
       </div>
@@ -131,7 +185,7 @@ export function ProjectForm({ project }: { project?: Project }) {
           <input type="text" name="status" defaultValue={project?.status ?? "Published"} required />
         </div>
         <div className="form-field">
-          <label>ICON (thumbnail shape, used when there&apos;s no photo)</label>
+          <label>ICON (fallback shape, used only when there&apos;s no photo or 3D model)</label>
           <select name="icon" defaultValue={project?.icon ?? "roll"}>
             {ICON_KINDS.map((k) => (
               <option key={k} value={k}>
@@ -143,24 +197,42 @@ export function ProjectForm({ project }: { project?: Project }) {
       </div>
 
       <div className="form-field">
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input type="checkbox" name="has3d" defaultChecked={project?.has3d} style={{ width: "auto" }} />
-          Show the &quot;3D&quot; badge on this project&apos;s card
-        </label>
+        <label>PHOTOS (first one is used as the card thumbnail)</label>
+        {images.length > 0 && (
+          <div className="admin-media-grid">
+            {images.map((img) => (
+              <div className="admin-media-item" key={img.key}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.kind === "existing" ? img.url : img.previewUrl} alt="" />
+                <button type="button" className="admin-media-remove" onClick={() => removeImage(img.key)}>
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input type="file" accept="image/*" multiple onChange={(e) => addImageFiles(e.target.files)} />
       </div>
 
       <div className="form-field">
-        <label>PHOTO</label>
-        {project?.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={project.imageUrl} alt="" className="admin-photo-preview" />
+        <label>3D MODEL (.glb or .gltf — shown in an interactive viewer on the project page)</label>
+        {model && (
+          <div className="admin-model-current">
+            <span>{model.kind === "existing" ? model.url.split("/").pop() : model.name}</span>
+            <button type="button" className="admin-btn" onClick={() => setModel(null)}>
+              REMOVE
+            </button>
+          </div>
         )}
-        <input type="file" name="photo" accept="image/*" />
-        {project?.imageUrl && (
-          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-            <input type="checkbox" name="removePhoto" style={{ width: "auto" }} />
-            Remove current photo (falls back to the wireframe icon)
-          </label>
+        {!model && (
+          <input
+            type="file"
+            accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) setModel({ kind: "new", file, name: file.name });
+            }}
+          />
         )}
       </div>
 

@@ -26,4 +26,6 @@ export function getSupabaseAdmin(): SupabaseClient {
   return adminClient;
 }
 
+// Holds project photos and 3D model (.glb/.gltf) files — named for its original
+// purpose, kept as-is since it's already live with real files.
 export const PROJECT_PHOTOS_BUCKET = "project-photos";

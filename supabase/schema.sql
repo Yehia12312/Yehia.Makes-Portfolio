@@ -10,9 +10,9 @@ create table if not exists projects (
   time text not null,
   cost text not null,
   tool text not null,
-  has3d boolean not null default false,
   icon text not null default 'roll',
-  image_url text,
+  images text[] not null default '{}',
+  model_url text,
   role text not null default '',
   status text not null default 'Published',
   tools text[] not null default '{}',
@@ -20,6 +20,28 @@ create table if not exists projects (
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
 );
+
+-- Upgrade path for projects created before the "images"/"model_url" columns existed
+-- (safe to re-run: no-ops once the old columns are gone).
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'projects' and column_name = 'image_url'
+  ) then
+    alter table projects add column if not exists images text[] not null default '{}';
+    alter table projects add column if not exists model_url text;
+    update projects set images = array[image_url]
+      where image_url is not null and (images is null or images = '{}');
+    alter table projects drop column image_url;
+  end if;
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'projects' and column_name = 'has3d'
+  ) then
+    alter table projects drop column has3d;
+  end if;
+end $$;
 
 create table if not exists settings (
   id integer primary key,
@@ -48,45 +70,45 @@ insert into settings (id) values (1)
 
 -- Seed the 7 projects the site launched with, so editing them in the admin panel
 -- persists to real rows instead of the app's hardcoded fallback data.
-insert into projects (code, category, title, time, cost, tool, has3d, icon, role, status, tools, reviews, sort_order)
+insert into projects (code, category, title, time, cost, tool, icon, role, status, tools, reviews, sort_order)
 values
-  ('PRJ-001', 'Plastic Injection', 'Replaceable Insert Seaming Roll', '96h', '$420', 'SW2024', true, 'roll',
+  ('PRJ-001', 'Plastic Injection', 'Replaceable Insert Seaming Roll', '96h', '$420', 'SW2024', 'roll',
    'Mold Designer', 'Published', array['SolidWorks 2024', 'Mold Tools', 'Moldflow'],
    '[
      {"who": "R. Hassan, Mold Shop Lead", "quote": "Clean parting line strategy and the insert swap logic saved real tooling cost on the second revision."},
      {"who": "A. Farouk, Production Engineer", "quote": "Documentation was thorough enough that manufacturing had zero clarifying questions."}
    ]'::jsonb, 0),
-  ('PRJ-002', 'Mechanisms', 'Dental Chair Movement Linkage', '52h', '$0', 'SW2023', true, 'linkage',
+  ('PRJ-002', 'Mechanisms', 'Dental Chair Movement Linkage', '52h', '$0', 'SW2023', 'linkage',
    'Mechanism Designer', 'Published', array['SolidWorks 2023', 'Motion Study'],
    '[
      {"who": "M. Adel, R&D Lead", "quote": "Motion range hit spec on the first physical prototype — the linkage geometry was dead on."},
      {"who": "S. Nabil, Test Engineer", "quote": "Load cases were documented clearly enough to validate without re-deriving anything."}
    ]'::jsonb, 1),
-  ('PRJ-003', 'Advanced Models', '6-Speed Gearbox Assembly', '70h', '$0', 'SW2024', false, 'gearbox',
+  ('PRJ-003', 'Advanced Models', '6-Speed Gearbox Assembly', '70h', '$0', 'SW2024', 'gearbox',
    'CAD Engineer', 'Published', array['SolidWorks 2024', 'Toolbox', 'GD&T'],
    '[
      {"who": "K. Osman, Instructor", "quote": "One of the cleanest full assemblies I have reviewed — mates are logical and rebuild fast."},
      {"who": "D. Wael, Peer Reviewer", "quote": "Gear ratios and shaft alignment all check out against the reference spec."}
    ]'::jsonb, 2),
-  ('PRJ-004', 'Reverse Engineering', 'CNC Spindle Housing Rebuild', '38h', '$180', 'GOM Scan', true, 'spindle',
+  ('PRJ-004', 'Reverse Engineering', 'CNC Spindle Housing Rebuild', '38h', '$180', 'GOM Scan', 'spindle',
    'Reverse Engineer', 'Published', array['GOM Scan', 'SolidWorks', 'Mesh2Surface'],
    '[
      {"who": "T. Ibrahim, Shop Owner", "quote": "Scan-to-CAD deviation stayed under 0.1mm — the rebuilt housing dropped straight in."},
      {"who": "N. Saleh, Machinist", "quote": "Tolerances on the bearing seats were spot on. No rework needed."}
    ]'::jsonb, 3),
-  ('PRJ-005', 'Sheet Metal', 'Enclosure Bracket Family', '22h', '$60', 'SW2023', false, 'bracket',
+  ('PRJ-005', 'Sheet Metal', 'Enclosure Bracket Family', '22h', '$60', 'SW2023', 'bracket',
    'Sheet Metal Designer', 'Published', array['SolidWorks Sheet Metal', 'DXF Export'],
    '[
      {"who": "H. Zaki, Fabricator", "quote": "Flat patterns and bend allowances were correct — laser cut and folded with no adjustment."},
      {"who": "L. Amin, Buyer", "quote": "The parametric family made re-sizing for the next SKU a five-minute job."}
    ]'::jsonb, 4),
-  ('PRJ-006', 'Plastic Injection', 'Monitor Stand Core / Cavity Set', '64h', '$310', 'SW Mold', true, 'cavity',
+  ('PRJ-006', 'Plastic Injection', 'Monitor Stand Core / Cavity Set', '64h', '$310', 'SW Mold', 'cavity',
    'Mold Designer', 'Published', array['SolidWorks Mold Tools', 'Moldflow', 'DFM Review'],
    '[
      {"who": "F. Gamal, Tooling Lead", "quote": "Draft and shut-off surfaces were handled correctly the first time — rare on a part this size."},
      {"who": "B. Youssef, Molder", "quote": "Cooling layout was thought through; cycle time came in under estimate."}
    ]'::jsonb, 5),
-  ('PRJ-007', 'Mechanisms', 'Rotary Indexing Fixture', '30h', '$95', 'SW2024', false, 'fixture',
+  ('PRJ-007', 'Mechanisms', 'Rotary Indexing Fixture', '30h', '$95', 'SW2024', 'fixture',
    'Mechanism Designer', 'Published', array['SolidWorks 2024', 'Motion Study', 'GD&T'],
    '[
      {"who": "W. Kamal, Line Engineer", "quote": "Index repeatability held across a full shift — the detent design was the right call."},

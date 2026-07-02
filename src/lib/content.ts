@@ -9,9 +9,9 @@ type ProjectRow = {
   time: string;
   cost: string;
   tool: string;
-  has3d: boolean;
   icon: Project["icon"];
-  image_url: string | null;
+  images: string[];
+  model_url: string | null;
   role: string;
   status: string;
   tools: string[];
@@ -49,9 +49,9 @@ function rowToProject(row: ProjectRow): Project {
     time: row.time,
     cost: row.cost,
     tool: row.tool,
-    has3d: row.has3d,
     icon: row.icon,
-    imageUrl: row.image_url,
+    images: row.images ?? [],
+    modelUrl: row.model_url,
     role: row.role,
     status: row.status,
     tools: row.tools ?? [],

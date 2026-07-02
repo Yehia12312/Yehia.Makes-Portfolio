@@ -9,7 +9,6 @@ export type ProjectInput = {
   time: string;
   cost: string;
   tool: string;
-  has3d: boolean;
   icon: Project["icon"];
   role: string;
   status: string;
@@ -25,7 +24,6 @@ function toRow(input: ProjectInput) {
     time: input.time,
     cost: input.cost,
     tool: input.tool,
-    has3d: input.has3d,
     icon: input.icon,
     role: input.role,
     status: input.status,
@@ -82,9 +80,15 @@ export async function deleteProject(id: string) {
   if (error) throw new Error(error.message);
 }
 
-export async function setProjectPhoto(id: string, imageUrl: string | null) {
+export async function updateProjectMedia(
+  id: string,
+  media: { images: string[]; modelUrl: string | null }
+) {
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("projects").update({ image_url: imageUrl }).eq("id", id);
+  const { error } = await supabase
+    .from("projects")
+    .update({ images: media.images, model_url: media.modelUrl })
+    .eq("id", id);
   if (error) throw new Error(error.message);
 }
 
@@ -108,12 +112,12 @@ export async function moveProject(id: string, direction: "up" | "down") {
 }
 
 /**
- * Photos upload directly from the browser to Supabase Storage (not through this
- * server's Server Actions), because Vercel serverless functions cap request
- * bodies at a few MB — too small for real photos. This issues a one-time signed
- * URL the browser can PUT the file to directly.
+ * Photos and 3D model files upload directly from the browser to Supabase Storage
+ * (not through this server's Server Actions), because Vercel serverless functions
+ * cap request bodies at a few MB — too small for real photos or GLB files. This
+ * issues a one-time signed URL the browser can PUT the file to directly.
  */
-export async function createPhotoUploadTicket(
+export async function createMediaUploadTicket(
   originalName: string
 ): Promise<{ signedUrl: string; publicUrl: string }> {
   const supabase = getSupabaseAdmin();

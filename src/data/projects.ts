@@ -30,9 +30,9 @@ export type Project = {
   time: string;
   cost: string;
   tool: string;
-  has3d: boolean;
   icon: IconKind;
-  imageUrl: string | null;
+  images: string[];
+  modelUrl: string | null;
   role: string;
   status: string;
   tools: string[];
@@ -109,9 +109,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "96h",
     cost: "$420",
     tool: "SW2024",
-    has3d: true,
     icon: "roll",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Mold Designer",
     status: "Published",
     tools: ["SolidWorks 2024", "Mold Tools", "Moldflow"],
@@ -137,9 +137,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "52h",
     cost: "$0",
     tool: "SW2023",
-    has3d: true,
     icon: "linkage",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Mechanism Designer",
     status: "Published",
     tools: ["SolidWorks 2023", "Motion Study"],
@@ -165,9 +165,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "70h",
     cost: "$0",
     tool: "SW2024",
-    has3d: false,
     icon: "gearbox",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "CAD Engineer",
     status: "Published",
     tools: ["SolidWorks 2024", "Toolbox", "GD&T"],
@@ -193,9 +193,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "38h",
     cost: "$180",
     tool: "GOM Scan",
-    has3d: true,
     icon: "spindle",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Reverse Engineer",
     status: "Published",
     tools: ["GOM Scan", "SolidWorks", "Mesh2Surface"],
@@ -220,9 +220,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "22h",
     cost: "$60",
     tool: "SW2023",
-    has3d: false,
     icon: "bracket",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Sheet Metal Designer",
     status: "Published",
     tools: ["SolidWorks Sheet Metal", "DXF Export"],
@@ -248,9 +248,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "64h",
     cost: "$310",
     tool: "SW Mold",
-    has3d: true,
     icon: "cavity",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Mold Designer",
     status: "Published",
     tools: ["SolidWorks Mold Tools", "Moldflow", "DFM Review"],
@@ -276,9 +276,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     time: "30h",
     cost: "$95",
     tool: "SW2024",
-    has3d: false,
     icon: "fixture",
-    imageUrl: null,
+    images: [],
+    modelUrl: null,
     role: "Mechanism Designer",
     status: "Published",
     tools: ["SolidWorks 2024", "Motion Study", "GD&T"],

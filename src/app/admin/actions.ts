@@ -11,12 +11,12 @@ import {
   requireAdminSession,
 } from "@/lib/adminAuth";
 import {
-  createPhotoUploadTicket,
+  createMediaUploadTicket,
   createProject,
   deleteProject,
   moveProject,
-  setProjectPhoto,
   updateProject,
+  updateProjectMedia,
   updateSettings,
   type ProjectInput,
 } from "@/lib/adminData";
@@ -68,7 +68,6 @@ function parseProjectInput(formData: FormData): ProjectInput {
     time: String(formData.get("time") ?? "").trim(),
     cost: String(formData.get("cost") ?? "").trim(),
     tool: String(formData.get("tool") ?? "").trim(),
-    has3d: formData.get("has3d") === "on",
     icon: String(formData.get("icon") ?? "roll") as IconKind,
     role: String(formData.get("role") ?? "").trim(),
     status: String(formData.get("status") ?? "").trim(),
@@ -79,17 +78,17 @@ function parseProjectInput(formData: FormData): ProjectInput {
 
 /**
  * Called directly from the client (not as a <form action>) before the rest of
- * the project form submits, so the photo bytes go straight from the browser
+ * the project form submits, so photo/model bytes go straight from the browser
  * to Supabase Storage instead of through this server.
  */
-export async function createPhotoUploadTicketAction(
+export async function createMediaUploadTicketAction(
   fileName: string
 ): Promise<{ signedUrl: string; publicUrl: string }> {
   await requireAdminSession();
   if (!isSupabaseAdminConfigured) {
     throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
   }
-  return createPhotoUploadTicket(fileName);
+  return createMediaUploadTicket(fileName);
 }
 
 export async function saveProjectAction(formData: FormData): Promise<void> {
@@ -109,12 +108,9 @@ export async function saveProjectAction(formData: FormData): Promise<void> {
     projectId = created.id;
   }
 
-  const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-  if (imageUrl) {
-    await setProjectPhoto(projectId, imageUrl);
-  } else if (formData.get("removePhoto") === "on") {
-    await setProjectPhoto(projectId, null);
-  }
+  const images = formData.getAll("images").map(String).filter(Boolean);
+  const modelUrl = String(formData.get("modelUrl") ?? "").trim() || null;
+  await updateProjectMedia(projectId, { images, modelUrl });
 
   revalidatePath("/");
   revalidatePath("/admin");

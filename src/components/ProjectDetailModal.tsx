@@ -1,5 +1,9 @@
+import { useMemo, useState } from "react";
 import type { Project } from "@/data/projects";
 import { WireIcon } from "./WireIcon";
+import { ModelViewer } from "./ModelViewer";
+
+type MediaItem = { kind: "model"; url: string } | { kind: "image"; url: string };
 
 export function ProjectDetailModal({
   project,
@@ -16,6 +20,16 @@ export function ProjectDetailModal({
     { k: "Status", v: project.status },
   ];
 
+  const media = useMemo<MediaItem[]>(() => {
+    const items: MediaItem[] = [];
+    if (project.modelUrl) items.push({ kind: "model", url: project.modelUrl });
+    for (const url of project.images) items.push({ kind: "image", url });
+    return items;
+  }, [project.modelUrl, project.images]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = media[activeIndex];
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -31,28 +45,51 @@ export function ProjectDetailModal({
           </button>
         </div>
         <div className="detail-grid">
-          <div className="viewer-stage">
-            {project.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={project.imageUrl} alt={project.title} className="viewer-photo" />
-            ) : (
-              <>
-                <div style={{ textAlign: "center" }}>
-                  <div className="viewer-model">
-                    <WireIcon kind={project.icon} opacity={0.5} />
+          <div>
+            <div className="viewer-stage">
+              {!active && (
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    <div className="viewer-model">
+                      <WireIcon kind={project.icon} opacity={0.5} />
+                    </div>
+                    <div className="viewer-hint">
+                      model-viewer renders here
+                      <br />
+                      (drag to rotate · scroll to zoom)
+                    </div>
                   </div>
-                  <div className="viewer-hint">
-                    model-viewer renders here
-                    <br />
-                    (drag to rotate · scroll to zoom)
+                  <div className="viewer-controls">
+                    <span>⟲ ROTATE</span>
+                    <span>⊕ ZOOM</span>
+                    <span>⛶ FULLSCREEN</span>
                   </div>
-                </div>
-                <div className="viewer-controls">
-                  <span>⟲ ROTATE</span>
-                  <span>⊕ ZOOM</span>
-                  <span>⛶ FULLSCREEN</span>
-                </div>
-              </>
+                </>
+              )}
+              {active?.kind === "model" && <ModelViewer src={active.url} alt={project.title} />}
+              {active?.kind === "image" && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={active.url} alt={project.title} className="viewer-photo" />
+              )}
+            </div>
+            {media.length > 1 && (
+              <div className="viewer-thumbs">
+                {media.map((item, i) => (
+                  <button
+                    key={item.url}
+                    type="button"
+                    className={`viewer-thumb${i === activeIndex ? " active" : ""}`}
+                    onClick={() => setActiveIndex(i)}
+                  >
+                    {item.kind === "model" ? (
+                      <span className="viewer-thumb-model">3D</span>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.url} alt="" />
+                    )}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
           <div className="sidebar">

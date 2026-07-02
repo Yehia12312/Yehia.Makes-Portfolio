@@ -66,7 +66,15 @@ Until these are set, `/admin` still loads but shows a "Supabase isn't connected 
 ### Using it
 
 Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, and you'll see:
-- **Projects** — add, edit, delete, and reorder (↑/↓) projects, including uploading a real photo per project (replaces the wireframe icon on the card and in the detail view).
+- **Projects** — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
 - **Hero & Text** — the headline, subtext, stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
 
 Changes save immediately and show up on the live site on the next page load — no redeploy needed.
+
+### Photos and 3D models per project
+
+Each project supports multiple photos (the first one is the card thumbnail) and one optional 3D model file (`.glb` or `.gltf`), rendered with a real interactive viewer (drag to rotate, scroll to zoom) instead of the wireframe icon placeholder. If a project has a 3D model, it takes priority in the viewer, with any photos available underneath as a thumbnail strip you can click through; the "● 3D" badge on a card now means there's an actual model to view, not just a manual flag.
+
+Photos and models upload directly from your browser to Supabase Storage (not through Vercel), so there's no practical size limit from the app's side — just keep GLB files reasonably optimized (well under 50MB) for fast loading on the live site. If you need to convert or compress a 3D model, [gltf.report](https://gltf.report) or Blender's glTF export are good free options.
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor — it's safe to run again any time (it only adds what's missing and migrates your existing photo into the new gallery format automatically).

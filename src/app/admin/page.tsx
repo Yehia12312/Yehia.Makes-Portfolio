@@ -65,15 +65,19 @@ export default async function AdminPage({
           {projects.map((p, i) => (
             <div className="admin-row" key={p.id}>
               <div className="admin-row-thumb">
-                {p.imageUrl ? (
+                {p.images[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.imageUrl} alt="" />
+                  <img src={p.images[0]} alt="" />
                 ) : (
                   <span className="admin-row-thumb-placeholder">{p.icon}</span>
                 )}
               </div>
               <div className="admin-row-main">
-                <div className="admin-row-code">{p.code}</div>
+                <div className="admin-row-code">
+                  {p.code}
+                  {p.modelUrl && <span className="admin-row-3d-badge"> · 3D MODEL</span>}
+                  {p.images.length > 1 && <span> · {p.images.length} PHOTOS</span>}
+                </div>
                 <div className="admin-row-title">{p.title}</div>
                 <div className="admin-row-category">{p.category}</div>
               </div>
