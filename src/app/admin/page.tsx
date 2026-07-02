@@ -1,23 +1,24 @@
 import Link from "next/link";
 import { getProjects, getSettings } from "@/lib/content";
 import { isSupabaseAdminConfigured } from "@/lib/supabase";
-import { listSectionsAdmin } from "@/lib/adminData";
+import { getAnalyticsSummary, listBookingsAdmin, listLeadsAdmin, listSectionsAdmin } from "@/lib/adminData";
 import { ADDABLE_SECTION_TYPES, BUILT_IN_SECTION_LABELS, DEFAULT_SECTIONS, type SectionType } from "@/data/sections";
 import {
   addSectionAction,
   deleteProjectAction,
   deleteSectionAction,
-  logoutAction,
   moveProjectAction,
   moveSectionAction,
   saveSettingsAction,
   toggleSectionAction,
 } from "./actions";
+import { AdminHeader } from "./AdminHeader";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 import { ColorField } from "./ColorField";
 import { SubmitButton } from "./SubmitButton";
 import { NavLinksEditor } from "./NavLinksEditor";
 import { ToggleSectionCheckbox } from "./ToggleSectionCheckbox";
+import { Overview } from "./Overview";
 
 export const dynamic = "force-dynamic";
 
@@ -42,26 +43,17 @@ export default async function AdminPage({
       }))
     : DEFAULT_SECTIONS.map((s) => ({ id: s.id, type: s.type, enabled: s.enabled, sortOrder: s.sortOrder }));
 
+  const overviewData = isSupabaseAdminConfigured
+    ? await Promise.all([listLeadsAdmin(), listBookingsAdmin(), getAnalyticsSummary()])
+    : null;
+
   return (
     <div className="admin-shell">
-      <div className="admin-header">
-        <div className="logo">
-          <div className="logo-mark">
-            <span>Y</span>
-          </div>
-          YEHIA.MAKES ADMIN
-        </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <a href="/" target="_blank" rel="noreferrer" className="admin-btn">
-            VIEW SITE →
-          </a>
-          <form action={logoutAction}>
-            <button type="submit" className="admin-btn">
-              LOG OUT
-            </button>
-          </form>
-        </div>
-      </div>
+      <AdminHeader active="dashboard" />
+
+      {overviewData && (
+        <Overview leads={overviewData[0]} bookings={overviewData[1]} analytics={overviewData[2]} />
+      )}
 
       {!isSupabaseAdminConfigured && (
         <div className="form-error" style={{ margin: "24px 48px 0" }}>

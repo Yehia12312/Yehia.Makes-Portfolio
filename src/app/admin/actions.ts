@@ -14,10 +14,13 @@ import {
   createMediaUploadTicket,
   createProject,
   createSection,
+  deleteBooking,
+  deleteLead,
   deleteProject,
   deleteSection,
   moveProject,
   moveSection,
+  setLeadStatus,
   updateProject,
   updateProjectMedia,
   updateSection,
@@ -269,4 +272,29 @@ export async function saveSectionContentAction(formData: FormData): Promise<void
   revalidatePath("/");
   revalidatePath("/admin");
   redirect("/admin?saved=1");
+}
+
+export async function markLeadStatusAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const status = formData.get("status") === "replied" ? "replied" : "new";
+  if (id) await setLeadStatus(id, status);
+  revalidatePath("/admin/leads");
+}
+
+export async function deleteLeadAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  if (id) await deleteLead(id);
+  revalidatePath("/admin/leads");
+}
+
+export async function deleteBookingAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  if (id) await deleteBooking(id);
+  revalidatePath("/admin/bookings");
 }

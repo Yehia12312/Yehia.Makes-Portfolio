@@ -66,6 +66,8 @@ Until these are set, `/admin` still loads but shows a "Supabase isn't connected 
 ### Using it
 
 Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, and you'll see:
+- **Dashboard** — an overview of new leads, upcoming calls, and site traffic (see below).
+- **Leads** and **Bookings** — every contact form submission and confirmed call, in one inbox (see below).
 - **Site Sections** — toggle sections on/off and reorder them, and add new Testimonials / Stats Band / About-Text sections anywhere on the page (see below).
 - **Projects** — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
 - **Navigation, Hero & Text** — the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
@@ -89,3 +91,14 @@ Each project supports multiple photos (the first one is the card thumbnail) and 
 Photos and models upload directly from your browser to Supabase Storage (not through Vercel), so there's no practical size limit from the app's side — just keep GLB files reasonably optimized (well under 50MB) for fast loading on the live site. If you need to convert or compress a 3D model, [gltf.report](https://gltf.report) or Blender's glTF export are good free options.
 
 **If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor — it's safe to run again any time (it only adds what's missing and migrates your existing photo into the new gallery format automatically).
+
+### Dashboard, Leads, Bookings & basic analytics
+
+The admin panel now works like a lightweight version of a Shopify-style dashboard for the site:
+- **Leads** — every contact form submission lands here automatically, with the sender's name/email/brief and their requested call slot if they picked one. Mark a lead **REPLIED** once you've followed up, reply directly via the **REPLY** mailto link, or delete it.
+- **Bookings** — every confirmed call (from the schedule panel + contact form flow) shows up here, marked **UPCOMING** or **PAST**, with a mailto link to the person who booked. These are also real events in your Cal.com calendar — this is just a browsable record alongside your other site data.
+- **Dashboard** (the `/admin` home page) — an Overview with new-lead and upcoming-call counts (click through to the full list), site visits over the last 7/30 days, a 14-day daily traffic chart, and your 5 most-viewed projects.
+
+Visit tracking is minimal and self-hosted — no cookies, no third-party analytics, just a page path and timestamp logged per page load (and per project detail view) into your own Supabase project.
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds the new `leads`, `bookings`, and `page_views` tables and is safe to run any time.

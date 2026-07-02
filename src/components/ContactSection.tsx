@@ -56,7 +56,7 @@ export function ContactSection() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, slotDisplay: selectedSlot?.display ?? null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send brief.");
@@ -65,7 +65,12 @@ export function ContactSection() {
         const bookRes = await fetch("/api/schedule/book", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ iso: selectedSlot.iso, name: form.name, email: form.email }),
+          body: JSON.stringify({
+            iso: selectedSlot.iso,
+            name: form.name,
+            email: form.email,
+            slotDisplay: selectedSlot.display,
+          }),
         });
         const bookData = await bookRes.json();
         if (!bookRes.ok) {

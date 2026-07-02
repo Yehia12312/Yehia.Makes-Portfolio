@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { recordLead } from "@/lib/adminData";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const name = body?.name?.trim();
   const email = body?.email?.trim();
   const brief = body?.brief?.trim();
+  const slotDisplay = typeof body?.slotDisplay === "string" ? body.slotDisplay : null;
 
   if (!name || !email || !brief) {
     return NextResponse.json(
@@ -13,6 +15,8 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  await recordLead({ name, email, brief, slotDisplay });
 
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Project } from "@/data/projects";
 import { WireIcon } from "./WireIcon";
 import { ModelViewer } from "./ModelViewer";
+import { trackPageView } from "@/lib/track";
 
 type MediaItem = { kind: "model"; url: string } | { kind: "image"; url: string };
 
@@ -12,6 +13,10 @@ export function ProjectDetailModal({
   project: Project;
   onClose: () => void;
 }) {
+  useEffect(() => {
+    trackPageView(`project:${project.code}`);
+  }, [project.code]);
+
   const stats: { k: string; v: string; accent?: boolean }[] = [
     { k: "Time invested", v: project.time.replace("h", " hours"), accent: true },
     { k: "Cost", v: project.cost },

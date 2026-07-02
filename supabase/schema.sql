@@ -164,3 +164,37 @@ create policy "Public read access" on settings for select using (true);
 insert into storage.buckets (id, name, public)
 values ('project-photos', 'project-photos', true)
 on conflict (id) do nothing;
+
+-- Leads (contact form submissions) and bookings (confirmed calls) — private
+-- business data. No public read/write policies: only the service role
+-- (used by /api routes and the admin panel) can touch these tables.
+create table if not exists leads (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  brief text not null,
+  status text not null default 'new',
+  slot_display text,
+  created_at timestamptz not null default now()
+);
+alter table leads enable row level security;
+
+create table if not exists bookings (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  slot_iso timestamptz not null,
+  slot_display text not null,
+  created_at timestamptz not null default now()
+);
+alter table bookings enable row level security;
+
+-- Basic page-view tracking for the admin overview (no personal data, no
+-- cookies — just a path and a timestamp per view).
+create table if not exists page_views (
+  id bigint generated always as identity primary key,
+  path text not null,
+  created_at timestamptz not null default now()
+);
+alter table page_views enable row level security;
+create index if not exists page_views_created_at_idx on page_views (created_at);

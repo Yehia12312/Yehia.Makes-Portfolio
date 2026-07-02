@@ -1,4 +1,5 @@
 import { Nav } from "@/components/Nav";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { Hero } from "@/components/Hero";
 import { Work } from "@/components/Work";
 import { ContactSection } from "@/components/ContactSection";
@@ -33,6 +34,7 @@ export default async function Home() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: colorOverrides }} />
+      <PageViewTracker />
       <div className="blueprint-bg" />
       <Nav navLinks={settings.navLinks} ctaLabel={settings.navCtaLabel} ctaAnchor={settings.navCtaAnchor} />
       {sections.map((section) => {
