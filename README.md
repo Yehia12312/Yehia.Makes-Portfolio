@@ -65,12 +65,12 @@ Until these are set, `/admin` still loads but shows a "Supabase isn't connected 
 
 ### Using it
 
-Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, and you'll see:
-- **Dashboard** — an overview of new leads, upcoming calls, and site traffic (see below).
-- **Leads** and **Bookings** — every contact form submission and confirmed call, in one inbox (see below).
-- **Site Sections** — toggle sections on/off and reorder them, and add new Testimonials / Stats Band / About-Text sections anywhere on the page (see below).
-- **Projects** — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
-- **Navigation, Hero & Text** — the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
+Visit `yoursite.com/admin` and log in with `ADMIN_PASSWORD`. Everything lives behind a permanent sidebar, each area on its own page:
+- **Dashboard** (`/admin`) — an overview of new leads, upcoming calls, and site traffic (see below).
+- **Leads** (`/admin/leads`) and **Bookings** (`/admin/bookings`) — every contact form submission and confirmed call, in one inbox (see below).
+- **Projects** (`/admin/projects`) — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
+- **Site Sections** (`/admin/sections`) — toggle sections on/off and reorder them, and add new Testimonials / Stats Band / About-Text sections anywhere on the page (see below).
+- **Nav, Hero & Colors** (`/admin/settings`) — the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
 
 Changes save immediately and show up on the live site on the next page load — no redeploy needed.
 

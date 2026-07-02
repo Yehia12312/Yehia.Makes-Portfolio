@@ -45,7 +45,7 @@ export function SectionForm({ section }: { section: Section }) {
       <div className="admin-section-header">
         <h2>{BUILT_IN_SECTION_LABELS[section.type]}</h2>
         <div style={{ display: "flex", gap: 10 }}>
-          <Link href="/admin" className="admin-btn">
+          <Link href="/admin/sections" className="admin-btn">
             CANCEL
           </Link>
           <button type="submit" className="admin-btn admin-btn-accent">

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSectionAdmin } from "@/lib/adminData";
 import type { Section, SectionType } from "@/data/sections";
+import { AdminSidebar } from "../../AdminSidebar";
 import { SectionForm } from "../SectionForm";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,10 @@ export default async function EditSectionPage({ params }: { params: Promise<{ id
 
   return (
     <div className="admin-shell">
-      <SectionForm section={section} />
+      <AdminSidebar active="sections" />
+      <div className="admin-main">
+        <SectionForm section={section} />
+      </div>
     </div>
   );
 }

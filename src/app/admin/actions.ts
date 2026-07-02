@@ -123,8 +123,8 @@ export async function saveProjectAction(formData: FormData): Promise<void> {
   await updateProjectMedia(projectId, { images, modelUrl });
 
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin");
+  revalidatePath("/admin/projects");
+  redirect("/admin/projects");
 }
 
 export async function deleteProjectAction(formData: FormData): Promise<void> {
@@ -133,7 +133,7 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (id) await deleteProject(id);
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projects");
 }
 
 export async function moveProjectAction(formData: FormData): Promise<void> {
@@ -143,7 +143,7 @@ export async function moveProjectAction(formData: FormData): Promise<void> {
   const direction = formData.get("direction") === "up" ? "up" : "down";
   if (id) await moveProject(id, direction);
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projects");
 }
 
 export async function saveSettingsAction(formData: FormData): Promise<void> {
@@ -176,8 +176,8 @@ export async function saveSettingsAction(formData: FormData): Promise<void> {
 
   await updateSettings(settings);
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin?saved=1");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=1");
 }
 
 function parseNavLinks(formData: FormData): NavLink[] {
@@ -196,7 +196,7 @@ export async function addSectionAction(formData: FormData): Promise<void> {
   const type = String(formData.get("type") ?? "") as SectionType;
   const created = await createSection(type, "", defaultContentFor(type));
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
   redirect(`/admin/sections/${created.id}`);
 }
 
@@ -207,7 +207,7 @@ export async function toggleSectionAction(formData: FormData): Promise<void> {
   const enabled = formData.get("enabled") === "on";
   if (id) await updateSection(id, { enabled });
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
 }
 
 export async function moveSectionAction(formData: FormData): Promise<void> {
@@ -217,7 +217,7 @@ export async function moveSectionAction(formData: FormData): Promise<void> {
   const direction = formData.get("direction") === "up" ? "up" : "down";
   if (id) await moveSection(id, direction);
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
 }
 
 export async function deleteSectionAction(formData: FormData): Promise<void> {
@@ -230,7 +230,7 @@ export async function deleteSectionAction(formData: FormData): Promise<void> {
   }
   if (id) await deleteSection(id);
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
 }
 
 export async function saveSectionContentAction(formData: FormData): Promise<void> {
@@ -270,8 +270,8 @@ export async function saveSectionContentAction(formData: FormData): Promise<void
 
   await updateSection(id, { anchor: String(formData.get("anchor") ?? "").trim(), content, enabled });
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin?saved=1");
+  revalidatePath("/admin/sections");
+  redirect("/admin/sections?saved=1");
 }
 
 export async function markLeadStatusAction(formData: FormData): Promise<void> {

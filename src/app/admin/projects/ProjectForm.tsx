@@ -127,7 +127,7 @@ export function ProjectForm({ project }: { project?: Project }) {
       <div className="admin-section-header">
         <h2>{project ? `Edit ${project.code}` : "New Project"}</h2>
         <div style={{ display: "flex", gap: 10 }}>
-          <Link href="/admin" className="admin-btn">
+          <Link href="/admin/projects" className="admin-btn">
             CANCEL
           </Link>
           <button type="submit" className="admin-btn admin-btn-accent" disabled={busy}>
