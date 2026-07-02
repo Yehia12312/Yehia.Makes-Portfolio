@@ -62,11 +62,43 @@ create table if not exists settings (
   color_text text not null default '#E8E6E0',
   color_text_dim text not null default '#6B7280',
   color_accent text not null default '#FF6B35',
-  color_verified text not null default '#2DD4BF'
+  color_verified text not null default '#2DD4BF',
+  nav_links jsonb not null default '[{"label":"Work","anchor":"work"},{"label":"About","anchor":"about"},{"label":"Reviews","anchor":"reviews"}]'::jsonb,
+  nav_cta_label text not null default 'SCHEDULE CALL →',
+  nav_cta_anchor text not null default 'contact'
 );
+
+-- Upgrade path for settings rows created before nav columns existed.
+alter table settings add column if not exists nav_links jsonb not null default '[{"label":"Work","anchor":"work"},{"label":"About","anchor":"about"},{"label":"Reviews","anchor":"reviews"}]'::jsonb;
+alter table settings add column if not exists nav_cta_label text not null default 'SCHEDULE CALL →';
+alter table settings add column if not exists nav_cta_anchor text not null default 'contact';
 
 insert into settings (id) values (1)
   on conflict (id) do nothing;
+
+create table if not exists sections (
+  id uuid primary key default gen_random_uuid(),
+  type text not null,
+  enabled boolean not null default true,
+  sort_order integer not null default 0,
+  anchor text not null default '',
+  content jsonb not null default '{}'::jsonb
+);
+
+-- Seed the 4 sections the site launches with (hero/projects/contact/footer are
+-- fixed types the app always knows how to render; their actual content still
+-- comes from the settings/projects tables, not this row's "content" column).
+insert into sections (id, type, enabled, sort_order, anchor, content)
+values
+  ('00000000-0000-0000-0000-000000000001', 'hero', true, 0, 'about', '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000002', 'projects', true, 1, 'work', '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000003', 'contact', true, 2, 'contact', '{}'::jsonb),
+  ('00000000-0000-0000-0000-000000000004', 'footer', true, 3, '', '{}'::jsonb)
+on conflict (id) do nothing;
+
+alter table sections enable row level security;
+drop policy if exists "Public read access" on sections;
+create policy "Public read access" on sections for select using (true);
 
 -- Seed the 7 projects the site launched with, so editing them in the admin panel
 -- persists to real rows instead of the app's hardcoded fallback data.

@@ -13,15 +13,26 @@ import {
 import {
   createMediaUploadTicket,
   createProject,
+  createSection,
   deleteProject,
+  deleteSection,
   moveProject,
+  moveSection,
   updateProject,
   updateProjectMedia,
+  updateSection,
   updateSettings,
   type ProjectInput,
 } from "@/lib/adminData";
 import { isSupabaseAdminConfigured } from "@/lib/supabase";
-import type { IconKind, Review, SiteSettings } from "@/data/projects";
+import type { IconKind, NavLink, Review, SiteSettings } from "@/data/projects";
+import { defaultContentFor, type SectionType } from "@/data/sections";
+
+function requireSupabaseConfigured(): void {
+  if (!isSupabaseAdminConfigured) {
+    throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+  }
+}
 
 export type LoginState = { error?: string } | undefined;
 
@@ -85,17 +96,13 @@ export async function createMediaUploadTicketAction(
   fileName: string
 ): Promise<{ signedUrl: string; publicUrl: string }> {
   await requireAdminSession();
-  if (!isSupabaseAdminConfigured) {
-    throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
-  }
+  requireSupabaseConfigured();
   return createMediaUploadTicket(fileName);
 }
 
 export async function saveProjectAction(formData: FormData): Promise<void> {
   await requireAdminSession();
-  if (!isSupabaseAdminConfigured) {
-    throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
-  }
+  requireSupabaseConfigured();
 
   const id = String(formData.get("id") ?? "").trim();
   const input = parseProjectInput(formData);
@@ -119,6 +126,7 @@ export async function saveProjectAction(formData: FormData): Promise<void> {
 
 export async function deleteProjectAction(formData: FormData): Promise<void> {
   await requireAdminSession();
+  requireSupabaseConfigured();
   const id = String(formData.get("id") ?? "");
   if (id) await deleteProject(id);
   revalidatePath("/");
@@ -127,6 +135,7 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
 
 export async function moveProjectAction(formData: FormData): Promise<void> {
   await requireAdminSession();
+  requireSupabaseConfigured();
   const id = String(formData.get("id") ?? "");
   const direction = formData.get("direction") === "up" ? "up" : "down";
   if (id) await moveProject(id, direction);
@@ -136,9 +145,7 @@ export async function moveProjectAction(formData: FormData): Promise<void> {
 
 export async function saveSettingsAction(formData: FormData): Promise<void> {
   await requireAdminSession();
-  if (!isSupabaseAdminConfigured) {
-    throw new Error("Supabase isn't configured yet — add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
-  }
+  requireSupabaseConfigured();
 
   const settings: SiteSettings = {
     heroName: String(formData.get("heroName") ?? ""),
@@ -159,9 +166,106 @@ export async function saveSettingsAction(formData: FormData): Promise<void> {
     colorTextDim: String(formData.get("colorTextDim") ?? ""),
     colorAccent: String(formData.get("colorAccent") ?? ""),
     colorVerified: String(formData.get("colorVerified") ?? ""),
+    navLinks: parseNavLinks(formData),
+    navCtaLabel: String(formData.get("navCtaLabel") ?? ""),
+    navCtaAnchor: String(formData.get("navCtaAnchor") ?? ""),
   };
 
   await updateSettings(settings);
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect("/admin?saved=1");
+}
+
+function parseNavLinks(formData: FormData): NavLink[] {
+  const labels = formData.getAll("navLinkLabel").map(String);
+  const anchors = formData.getAll("navLinkAnchor").map(String);
+  return labels
+    .map((label, i) => ({ label: label.trim(), anchor: (anchors[i] ?? "").trim() }))
+    .filter((l) => l.label && l.anchor);
+}
+
+const BUILT_IN_SECTION_TYPES: SectionType[] = ["hero", "projects", "contact", "footer"];
+
+export async function addSectionAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const type = String(formData.get("type") ?? "") as SectionType;
+  const created = await createSection(type, "", defaultContentFor(type));
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect(`/admin/sections/${created.id}`);
+}
+
+export async function toggleSectionAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const enabled = formData.get("enabled") === "on";
+  if (id) await updateSection(id, { enabled });
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function moveSectionAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const direction = formData.get("direction") === "up" ? "up" : "down";
+  if (id) await moveSection(id, direction);
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function deleteSectionAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+  const id = String(formData.get("id") ?? "");
+  const type = String(formData.get("type") ?? "") as SectionType;
+  if (BUILT_IN_SECTION_TYPES.includes(type)) {
+    throw new Error(`"${type}" is a built-in section — disable it instead of deleting it.`);
+  }
+  if (id) await deleteSection(id);
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function saveSectionContentAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  requireSupabaseConfigured();
+
+  const id = String(formData.get("id") ?? "");
+  const type = String(formData.get("type") ?? "") as SectionType;
+  const enabled = formData.get("enabled") === "on";
+
+  let content: object;
+  if (type === "testimonials") {
+    const whos = formData.getAll("itemWho").map(String);
+    const quotes = formData.getAll("itemQuote").map(String);
+    content = {
+      title: String(formData.get("title") ?? ""),
+      items: whos
+        .map((who, i) => ({ who: who.trim(), quote: (quotes[i] ?? "").trim() }))
+        .filter((i) => i.who && i.quote),
+    };
+  } else if (type === "stats") {
+    const values = formData.getAll("itemValue").map(String);
+    const labels = formData.getAll("itemLabel").map(String);
+    content = {
+      items: values
+        .map((value, i) => ({ value: value.trim(), label: (labels[i] ?? "").trim() }))
+        .filter((i) => i.value && i.label),
+    };
+  } else if (type === "about") {
+    content = {
+      title: String(formData.get("title") ?? ""),
+      body: String(formData.get("body") ?? ""),
+    };
+  } else {
+    content = {};
+  }
+
+  await updateSection(id, { anchor: String(formData.get("anchor") ?? "").trim(), content, enabled });
   revalidatePath("/");
   revalidatePath("/admin");
   redirect("/admin?saved=1");

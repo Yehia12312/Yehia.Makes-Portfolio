@@ -1,5 +1,6 @@
 import { getSupabasePublic, isSupabaseConfigured } from "./supabase";
-import { DEFAULT_PROJECTS, DEFAULT_SETTINGS, type Project, type SiteSettings } from "@/data/projects";
+import { DEFAULT_PROJECTS, DEFAULT_SETTINGS, type NavLink, type Project, type SiteSettings } from "@/data/projects";
+import { DEFAULT_SECTIONS, type Section, type SectionType } from "@/data/sections";
 
 type ProjectRow = {
   id: string;
@@ -38,6 +39,18 @@ type SettingsRow = {
   color_text_dim: string;
   color_accent: string;
   color_verified: string;
+  nav_links: NavLink[];
+  nav_cta_label: string;
+  nav_cta_anchor: string;
+};
+
+type SectionRow = {
+  id: string;
+  type: SectionType;
+  enabled: boolean;
+  sort_order: number;
+  anchor: string;
+  content: Section["content"];
 };
 
 function rowToProject(row: ProjectRow): Project {
@@ -80,6 +93,20 @@ function rowToSettings(row: SettingsRow): SiteSettings {
     colorTextDim: row.color_text_dim,
     colorAccent: row.color_accent,
     colorVerified: row.color_verified,
+    navLinks: row.nav_links ?? [],
+    navCtaLabel: row.nav_cta_label,
+    navCtaAnchor: row.nav_cta_anchor,
+  };
+}
+
+function rowToSection(row: SectionRow): Section {
+  return {
+    id: row.id,
+    type: row.type,
+    enabled: row.enabled,
+    sortOrder: row.sort_order,
+    anchor: row.anchor,
+    content: row.content ?? {},
   };
 }
 
@@ -111,5 +138,21 @@ export async function getSettings(): Promise<SiteSettings> {
     return rowToSettings(data as SettingsRow);
   } catch {
     return DEFAULT_SETTINGS;
+  }
+}
+
+export async function getSections(): Promise<Section[]> {
+  if (!isSupabaseConfigured) return DEFAULT_SECTIONS;
+  try {
+    const supabase = getSupabasePublic();
+    const { data, error } = await supabase
+      .from("sections")
+      .select("*")
+      .eq("enabled", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data || data.length === 0) return DEFAULT_SECTIONS;
+    return (data as SectionRow[]).map(rowToSection);
+  } catch {
+    return DEFAULT_SECTIONS;
   }
 }

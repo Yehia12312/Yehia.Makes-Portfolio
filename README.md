@@ -66,10 +66,21 @@ Until these are set, `/admin` still loads but shows a "Supabase isn't connected 
 ### Using it
 
 Visit `yoursite.com/admin`, log in with `ADMIN_PASSWORD`, and you'll see:
+- **Site Sections** — toggle sections on/off and reorder them, and add new Testimonials / Stats Band / About-Text sections anywhere on the page (see below).
 - **Projects** — add, edit, delete, and reorder (↑/↓) projects, including a real photo gallery and an optional 3D model file per project (see below).
-- **Hero & Text** — the headline, subtext, stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
+- **Navigation, Hero & Text** — the nav menu links + CTA button, the hero headline/subtext/stats, and all 7 brand colors (background, panels, text, accent orange, verified teal).
 
 Changes save immediately and show up on the live site on the next page load — no redeploy needed.
+
+### Site sections (add/remove/reorder page sections, edit the nav menu)
+
+The page is built from a list of sections you control from admin, not a fixed layout:
+- **Hero, Project Grid, Contact, Footer** are built-in — you can toggle them on/off and reorder them, but their content is edited in the "Projects" and "Navigation, Hero & Text" areas rather than as a section itself (there's only ever one of each, so there's nothing to "add").
+- **Testimonials, Stats Band, About/Text** are types you can add as many of as you like, place anywhere in the order, and fully edit or delete.
+
+Each section has an **anchor** (e.g. `work`, `about`) — that's what nav links point to. Edit the nav menu (add/remove links, each pointing to a section's anchor, plus the top-right CTA button) under **Navigation, Hero & Text → Navigation**.
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — safe to run any time, it only adds what's missing.
 
 ### Photos and 3D models per project
 

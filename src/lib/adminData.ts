@@ -133,33 +133,102 @@ export async function createMediaUploadTicket(
   return { signedUrl: data.signedUrl, publicUrl: publicData.publicUrl };
 }
 
-const SETTINGS_COLUMNS: Record<keyof SiteSettings, string> = {
-  heroName: "hero_name",
-  heroDisc: "hero_disc",
-  heroRev: "hero_rev",
-  heroPrefix: "hero_prefix",
-  heroEmphasis: "hero_emphasis",
-  heroSuffix: "hero_suffix",
-  heroLede: "hero_lede",
-  statHours: "stat_hours",
-  statRating: "stat_rating",
-  statCertValue: "stat_cert_value",
-  statCertLabel: "stat_cert_label",
-  colorBg: "color_bg",
-  colorPanel: "color_panel",
-  colorPanelHover: "color_panel_hover",
-  colorText: "color_text",
-  colorTextDim: "color_text_dim",
-  colorAccent: "color_accent",
-  colorVerified: "color_verified",
+const STRING_SETTINGS_COLUMNS: Record<string, keyof SiteSettings> = {
+  hero_name: "heroName",
+  hero_disc: "heroDisc",
+  hero_rev: "heroRev",
+  hero_prefix: "heroPrefix",
+  hero_emphasis: "heroEmphasis",
+  hero_suffix: "heroSuffix",
+  hero_lede: "heroLede",
+  stat_hours: "statHours",
+  stat_rating: "statRating",
+  stat_cert_value: "statCertValue",
+  stat_cert_label: "statCertLabel",
+  color_bg: "colorBg",
+  color_panel: "colorPanel",
+  color_panel_hover: "colorPanelHover",
+  color_text: "colorText",
+  color_text_dim: "colorTextDim",
+  color_accent: "colorAccent",
+  color_verified: "colorVerified",
+  nav_cta_label: "navCtaLabel",
+  nav_cta_anchor: "navCtaAnchor",
 };
 
 export async function updateSettings(settings: SiteSettings) {
   const supabase = getSupabaseAdmin();
-  const row: Record<string, string> = {};
-  for (const key of Object.keys(SETTINGS_COLUMNS) as (keyof SiteSettings)[]) {
-    row[SETTINGS_COLUMNS[key]] = settings[key];
+  const row: Record<string, string | SiteSettings["navLinks"]> = { nav_links: settings.navLinks };
+  for (const [column, key] of Object.entries(STRING_SETTINGS_COLUMNS)) {
+    row[column] = settings[key] as string;
   }
   const { error } = await supabase.from("settings").upsert({ id: 1, ...row }, { onConflict: "id" });
   if (error) throw new Error(error.message);
+}
+
+export async function listSectionsAdmin() {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("sections").select("*").order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function getSectionAdmin(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("sections").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createSection(type: string, anchor: string, content: object) {
+  const supabase = getSupabaseAdmin();
+  const { data: maxRow } = await supabase
+    .from("sections")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextSortOrder = (maxRow?.sort_order ?? -1) + 1;
+
+  const { data, error } = await supabase
+    .from("sections")
+    .insert({ type, anchor, content, sort_order: nextSortOrder, enabled: true })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateSection(
+  id: string,
+  fields: { anchor?: string; content?: object; enabled?: boolean }
+) {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("sections").update(fields).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteSection(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("sections").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function moveSection(id: string, direction: "up" | "down") {
+  const supabase = getSupabaseAdmin();
+  const { data: rows, error } = await supabase
+    .from("sections")
+    .select("id, sort_order")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  if (!rows) return;
+
+  const index = rows.findIndex((r) => r.id === id);
+  const swapWith = direction === "up" ? index - 1 : index + 1;
+  if (index === -1 || swapWith < 0 || swapWith >= rows.length) return;
+
+  const a = rows[index];
+  const b = rows[swapWith];
+  await supabase.from("sections").update({ sort_order: b.sort_order }).eq("id", a.id);
+  await supabase.from("sections").update({ sort_order: a.sort_order }).eq("id", b.id);
 }

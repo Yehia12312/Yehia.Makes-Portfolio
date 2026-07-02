@@ -6,7 +6,7 @@ export function ConfirmDeleteButton({ label = "DELETE" }: { label?: string }) {
       type="submit"
       className="admin-btn admin-btn-danger"
       onClick={(e) => {
-        if (!confirm("Delete this project? This can't be undone.")) {
+        if (!confirm("Delete this? This can't be undone.")) {
           e.preventDefault();
         }
       }}

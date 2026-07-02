@@ -1133,3 +1133,37 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* === CUSTOM SECTIONS (Testimonials / Stats / About) === */
+.page-section {
+  position: relative;
+  z-index: 1;
+  padding: 90px 48px;
+  border-top: 1px solid var(--border);
+  max-width: 1100px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  letter-spacing: -0.01em;
+}
+
+.about-body {
+  color: var(--text-dim);
+  font-size: 15px;
+  max-width: 640px;
+  white-space: pre-wrap;
+}
+
+.hero-stats.standalone {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.review-cards.standalone {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}

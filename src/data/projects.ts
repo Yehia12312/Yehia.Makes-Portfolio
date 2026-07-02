@@ -40,6 +40,8 @@ export type Project = {
   sortOrder: number;
 };
 
+export type NavLink = { label: string; anchor: string };
+
 export type SiteSettings = {
   heroName: string;
   heroDisc: string;
@@ -59,6 +61,9 @@ export type SiteSettings = {
   colorTextDim: string;
   colorAccent: string;
   colorVerified: string;
+  navLinks: NavLink[];
+  navCtaLabel: string;
+  navCtaAnchor: string;
 };
 
 export const CATEGORIES = [
@@ -98,6 +103,13 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   colorTextDim: "#6B7280",
   colorAccent: "#FF6B35",
   colorVerified: "#2DD4BF",
+  navLinks: [
+    { label: "Work", anchor: "work" },
+    { label: "About", anchor: "about" },
+    { label: "Reviews", anchor: "reviews" },
+  ],
+  navCtaLabel: "SCHEDULE CALL →",
+  navCtaAnchor: "contact",
 };
 
 export const DEFAULT_PROJECTS: Project[] = [

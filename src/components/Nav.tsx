@@ -1,4 +1,14 @@
-export function Nav() {
+import type { NavLink } from "@/data/projects";
+
+export function Nav({
+  navLinks,
+  ctaLabel,
+  ctaAnchor,
+}: {
+  navLinks: NavLink[];
+  ctaLabel: string;
+  ctaAnchor: string;
+}) {
   return (
     <nav className="nav">
       <div className="logo">
@@ -8,12 +18,14 @@ export function Nav() {
         YEHIA.MAKES
       </div>
       <div className="nav-links">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
-        <a href="#reviews">Reviews</a>
+        {navLinks.map((link) => (
+          <a key={link.anchor} href={`#${link.anchor}`}>
+            {link.label}
+          </a>
+        ))}
       </div>
-      <a href="#contact" className="nav-cta">
-        SCHEDULE CALL →
+      <a href={`#${ctaAnchor}`} className="nav-cta">
+        {ctaLabel}
       </a>
     </nav>
   );
