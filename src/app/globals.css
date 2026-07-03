@@ -210,6 +210,7 @@ button {
   z-index: 1;
   padding: 110px 48px 0;
   max-width: 1100px;
+  margin: 0 auto;
 }
 .projects-page-header h1 {
   font-family: var(--font-display);
@@ -225,6 +226,7 @@ button {
   z-index: 1;
   padding: 110px 48px 90px;
   max-width: 1100px;
+  margin: 0 auto;
 }
 
 .title-block {
@@ -849,6 +851,7 @@ button {
   grid-template-columns: 1fr 1fr;
   gap: 64px;
   max-width: 1100px;
+  margin: 0 auto;
 }
 @media (max-width: 760px) {
   .contact-grid {
@@ -1401,6 +1404,7 @@ button {
   padding: 90px 48px;
   border-top: 1px solid var(--border);
   max-width: 1100px;
+  margin: 0 auto;
 }
 
 .section-title {
