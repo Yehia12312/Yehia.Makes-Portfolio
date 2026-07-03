@@ -44,6 +44,9 @@ export type Project = {
 export type NavLink = { label: string; anchor: string };
 
 export type LogoPosition = "before" | "after";
+export type TextDirection = "ltr" | "rtl";
+export type TextAlign = "left" | "center" | "right";
+export type HeroFontFamily = "default" | "arabic";
 
 export type SiteSettings = {
   heroName: string;
@@ -53,6 +56,10 @@ export type SiteSettings = {
   heroEmphasis: string;
   heroSuffix: string;
   heroLede: string;
+  heroDirection: TextDirection;
+  heroTextAlign: TextAlign;
+  heroFontFamily: HeroFontFamily;
+  heroFontSize: number;
   statHours: string;
   statRating: string;
   statCertValue: string;
@@ -106,6 +113,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroSuffix: ", not just rendered.",
   heroLede:
     "A working register of mold design, reverse engineering, and mechanical projects — each one with the real numbers attached: time spent, cost, and the tools used to get there.",
+  heroDirection: "ltr",
+  heroTextAlign: "left",
+  heroFontFamily: "default",
+  heroFontSize: 64,
   statHours: "342h",
   statRating: "4.9",
   statCertValue: "CSWE",

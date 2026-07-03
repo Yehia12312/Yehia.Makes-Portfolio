@@ -44,6 +44,10 @@ type SettingsRow = {
   hero_emphasis: string;
   hero_suffix: string;
   hero_lede: string;
+  hero_direction: SiteSettings["heroDirection"];
+  hero_text_align: SiteSettings["heroTextAlign"];
+  hero_font_family: SiteSettings["heroFontFamily"];
+  hero_font_size: number;
   stat_hours: string;
   stat_rating: string;
   stat_cert_value: string;
@@ -112,6 +116,10 @@ function rowToSettings(row: SettingsRow): SiteSettings {
     heroEmphasis: row.hero_emphasis,
     heroSuffix: row.hero_suffix,
     heroLede: row.hero_lede,
+    heroDirection: row.hero_direction,
+    heroTextAlign: row.hero_text_align,
+    heroFontFamily: row.hero_font_family,
+    heroFontSize: row.hero_font_size,
     statHours: row.stat_hours,
     statRating: row.stat_rating,
     statCertValue: row.stat_cert_value,

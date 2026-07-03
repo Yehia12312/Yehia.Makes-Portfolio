@@ -7,9 +7,19 @@ import { Footer } from "@/components/Footer";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { StatsSection } from "@/components/StatsSection";
 import { AboutSection } from "@/components/AboutSection";
+import { CertificationsSection } from "@/components/CertificationsSection";
+import { LogosSection } from "@/components/LogosSection";
+import { ExperienceSection } from "@/components/ExperienceSection";
 import { getProjects, getSections, getSettings } from "@/lib/content";
 import { buildColorOverrideCss } from "@/lib/colorOverrides";
-import type { AboutContent, StatsContent, TestimonialsContent } from "@/data/sections";
+import type {
+  AboutContent,
+  CertificationsContent,
+  ExperienceContent,
+  LogosContent,
+  StatsContent,
+  TestimonialsContent,
+} from "@/data/sections";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +63,26 @@ export default async function Home() {
           case "about":
             return (
               <AboutSection key={section.id} content={section.content as AboutContent} anchor={section.anchor} />
+            );
+          case "certifications":
+            return (
+              <CertificationsSection
+                key={section.id}
+                content={section.content as CertificationsContent}
+                anchor={section.anchor}
+              />
+            );
+          case "logos":
+            return (
+              <LogosSection key={section.id} content={section.content as LogosContent} anchor={section.anchor} />
+            );
+          case "experience":
+            return (
+              <ExperienceSection
+                key={section.id}
+                content={section.content as ExperienceContent}
+                anchor={section.anchor}
+              />
             );
           case "contact":
             return <ContactSection key={section.id} />;

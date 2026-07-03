@@ -77,9 +77,12 @@ Changes save immediately and show up on the live site on the next page load — 
 
 ### Site sections (add/remove/reorder page sections, edit the nav menu)
 
-The page is built from a list of sections you control from admin, not a fixed layout:
+The page is built from a list of sections you control from admin, not a fixed layout — this is how you turn the site from a plain project showcase into a guided story: add the sections that tell it (Experience → Certifications → Company Logos → Testimonials, in whatever order makes sense) and arrange them with the ↑/↓ reorder buttons in `/admin/sections`.
 - **Hero, Project Grid, Contact, Footer** are built-in — you can toggle them on/off and reorder them, but their content is edited in the "Projects" and "Navigation, Hero & Text" areas rather than as a section itself (there's only ever one of each, so there's nothing to "add").
-- **Testimonials, Stats Band, About/Text** are types you can add as many of as you like, place anywhere in the order, and fully edit or delete.
+- **Testimonials, Stats Band, About/Text, Experience, Certifications, Company Logos** are types you can add as many of as you like, place anywhere in the order, and fully edit or delete:
+  - **Experience** — a timeline of role / organization / period / description entries.
+  - **Certifications** — a grid of badges/certifications, each with a title, issuer, date, and an optional badge image.
+  - **Company Logos** — a "worked with" strip of client/company logos (upload an image per entry).
 
 Each section has an **anchor** (e.g. `work`, `about`) — that's what nav links point to. Edit the nav menu (add/remove links, each pointing to a section's anchor, plus the top-right CTA button) under **Navigation, Hero & Text → Navigation**.
 
@@ -120,3 +123,15 @@ The whole site (homepage, `/projects`, and the admin panel) is also fully respon
 Under **Nav, Hero & Colors → Logo**, you can upload an image to show beside "YEHIA.MAKES" in the nav (off by default — matches the site's original text-only look), control its width in pixels, and choose whether it sits before or after the text.
 
 **If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds the logo columns to `settings` and is safe to run any time.
+
+### Arabic / RTL hero
+
+Under **Nav, Hero & Colors → Hero language & typography**, you can write the headline and subtext fields above in Arabic (or any other language) and control:
+- **Text direction** — left-to-right or right-to-left, so Arabic reads correctly.
+- **Text position** — left, center, or right alignment.
+- **Font** — the site's default (Space Grotesk) or a proper Arabic web font (Cairo).
+- **Headline size** — in pixels, since translated text is often a different length than the English original.
+
+This only changes the Hero section — the rest of the site's UI (nav, buttons, admin panel) stays as-is.
+
+**If you set up Supabase before this feature existed**, re-run [`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor again — it adds the hero direction/alignment/font/size columns to `settings` and is safe to run any time.

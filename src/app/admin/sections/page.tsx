@@ -9,7 +9,14 @@ import { ToggleSectionCheckbox } from "../ToggleSectionCheckbox";
 
 export const dynamic = "force-dynamic";
 
-const CUSTOM_SECTION_TYPES: SectionType[] = ["testimonials", "stats", "about"];
+const CUSTOM_SECTION_TYPES: SectionType[] = [
+  "testimonials",
+  "stats",
+  "about",
+  "certifications",
+  "logos",
+  "experience",
+];
 
 export default async function AdminSectionsPage({
   searchParams,

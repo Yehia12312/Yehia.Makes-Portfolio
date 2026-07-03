@@ -83,6 +83,13 @@ alter table settings add column if not exists logo_enabled boolean not null defa
 alter table settings add column if not exists logo_width integer not null default 28;
 alter table settings add column if not exists logo_position text not null default 'before';
 
+-- Hero language/typography control: lets the hero headline be written in
+-- Arabic (or any RTL language) with its own direction, alignment, font, and size.
+alter table settings add column if not exists hero_direction text not null default 'ltr';
+alter table settings add column if not exists hero_text_align text not null default 'left';
+alter table settings add column if not exists hero_font_family text not null default 'default';
+alter table settings add column if not exists hero_font_size integer not null default 64;
+
 insert into settings (id) values (1)
   on conflict (id) do nothing;
 

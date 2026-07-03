@@ -167,6 +167,11 @@ export async function saveSettingsAction(formData: FormData): Promise<void> {
     heroEmphasis: String(formData.get("heroEmphasis") ?? ""),
     heroSuffix: String(formData.get("heroSuffix") ?? ""),
     heroLede: String(formData.get("heroLede") ?? ""),
+    heroDirection: formData.get("heroDirection") === "rtl" ? "rtl" : "ltr",
+    heroTextAlign:
+      formData.get("heroTextAlign") === "right" ? "right" : formData.get("heroTextAlign") === "center" ? "center" : "left",
+    heroFontFamily: formData.get("heroFontFamily") === "arabic" ? "arabic" : "default",
+    heroFontSize: Number(formData.get("heroFontSize")) || 64,
     statHours: String(formData.get("statHours") ?? ""),
     statRating: String(formData.get("statRating") ?? ""),
     statCertValue: String(formData.get("statCertValue") ?? ""),
@@ -277,6 +282,46 @@ export async function saveSectionContentAction(formData: FormData): Promise<void
     content = {
       title: String(formData.get("title") ?? ""),
       body: String(formData.get("body") ?? ""),
+    };
+  } else if (type === "experience") {
+    const roles = formData.getAll("itemRole").map(String);
+    const orgs = formData.getAll("itemOrg").map(String);
+    const periods = formData.getAll("itemPeriod").map(String);
+    const descriptions = formData.getAll("itemDescription").map(String);
+    content = {
+      items: roles
+        .map((role, i) => ({
+          role: role.trim(),
+          org: (orgs[i] ?? "").trim(),
+          period: (periods[i] ?? "").trim(),
+          description: (descriptions[i] ?? "").trim(),
+        }))
+        .filter((i) => i.role && i.org),
+    };
+  } else if (type === "certifications") {
+    const titles = formData.getAll("itemTitle").map(String);
+    const issuers = formData.getAll("itemIssuer").map(String);
+    const dates = formData.getAll("itemDate").map(String);
+    const imageUrls = formData.getAll("itemImageUrl").map(String);
+    content = {
+      title: String(formData.get("title") ?? ""),
+      items: titles
+        .map((title, i) => ({
+          title: title.trim(),
+          issuer: (issuers[i] ?? "").trim(),
+          date: (dates[i] ?? "").trim(),
+          imageUrl: (imageUrls[i] ?? "").trim() || null,
+        }))
+        .filter((i) => i.title),
+    };
+  } else if (type === "logos") {
+    const names = formData.getAll("itemName").map(String);
+    const logoUrls = formData.getAll("itemLogoUrl").map(String);
+    content = {
+      title: String(formData.get("title") ?? ""),
+      items: names
+        .map((name, i) => ({ name: name.trim(), imageUrl: (logoUrls[i] ?? "").trim() }))
+        .filter((i) => i.imageUrl),
     };
   } else {
     content = {};

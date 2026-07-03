@@ -1428,6 +1428,104 @@ button {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+/* === CERTIFICATIONS === */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.cert-card {
+  background: var(--bg);
+  padding: 24px 20px;
+  text-align: center;
+}
+.cert-badge {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+}
+.cert-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cert-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.cert-meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+/* === COMPANY LOGOS === */
+.logos-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 48px;
+}
+.logos-strip-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.6;
+  filter: grayscale(100%);
+  transition: opacity 0.2s;
+}
+.logos-strip-img:hover {
+  opacity: 1;
+}
+
+/* === EXPERIENCE / TIMELINE === */
+.experience-list {
+  display: flex;
+  flex-direction: column;
+}
+.experience-item {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  padding: 22px 0;
+  border-top: 1px solid var(--border);
+}
+.experience-item:first-child {
+  border-top: none;
+}
+.experience-period {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+.experience-role {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+}
+.experience-org {
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 4px;
+}
+.experience-desc {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-dim);
+  max-width: 640px;
+}
+@media (max-width: 620px) {
+  .experience-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 /* === ADMIN OVERVIEW === */
 .admin-stats-grid {
   display: grid;

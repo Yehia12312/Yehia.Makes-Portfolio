@@ -167,6 +167,9 @@ const STRING_SETTINGS_COLUMNS: Record<string, keyof SiteSettings> = {
   hero_emphasis: "heroEmphasis",
   hero_suffix: "heroSuffix",
   hero_lede: "heroLede",
+  hero_direction: "heroDirection",
+  hero_text_align: "heroTextAlign",
+  hero_font_family: "heroFontFamily",
   stat_hours: "statHours",
   stat_rating: "statRating",
   stat_cert_value: "statCertValue",
@@ -190,6 +193,7 @@ export async function updateSettings(settings: SiteSettings) {
     logo_enabled: settings.logoEnabled,
     logo_width: settings.logoWidth,
     logo_position: settings.logoPosition,
+    hero_font_size: settings.heroFontSize,
   };
   for (const [column, key] of Object.entries(STRING_SETTINGS_COLUMNS)) {
     row[column] = settings[key] as string;

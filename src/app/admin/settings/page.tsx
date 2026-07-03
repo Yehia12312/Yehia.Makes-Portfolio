@@ -101,6 +101,42 @@ export default async function AdminSettingsPage({
             <textarea name="heroLede" defaultValue={settings.heroLede} style={{ height: 90 }} />
           </div>
 
+          <div className="admin-section-header" style={{ marginTop: 0 }}>
+            <h3>Hero language &amp; typography</h3>
+          </div>
+          <p className="admin-hint">
+            Write the headline/subtext above in Arabic (or any other language) and use these to make
+            it render correctly — right-to-left direction, a proper Arabic font, and your own size.
+          </p>
+          <div className="admin-grid-3">
+            <div className="form-field">
+              <label>TEXT DIRECTION</label>
+              <select name="heroDirection" defaultValue={settings.heroDirection}>
+                <option value="ltr">Left-to-right</option>
+                <option value="rtl">Right-to-left (Arabic, Hebrew, etc.)</option>
+              </select>
+            </div>
+            <div className="form-field">
+              <label>TEXT POSITION</label>
+              <select name="heroTextAlign" defaultValue={settings.heroTextAlign}>
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div className="form-field">
+              <label>FONT</label>
+              <select name="heroFontFamily" defaultValue={settings.heroFontFamily}>
+                <option value="default">Default (Space Grotesk)</option>
+                <option value="arabic">Arabic (Cairo)</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-field" style={{ maxWidth: 200 }}>
+            <label>HEADLINE SIZE (px)</label>
+            <input type="number" name="heroFontSize" defaultValue={settings.heroFontSize} min={24} max={120} />
+          </div>
+
           <div className="admin-grid-2">
             <div className="form-field">
               <label>HOURS STAT</label>

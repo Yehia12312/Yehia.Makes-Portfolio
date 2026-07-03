@@ -8,9 +8,15 @@ export function Hero({ settings, projectCount }: { settings: SiteSettings; proje
     { num: settings.statCertValue, label: settings.statCertLabel },
   ];
 
+  const headlineStyle: React.CSSProperties = {
+    textAlign: settings.heroTextAlign,
+    fontSize: settings.heroFontSize,
+    fontFamily: settings.heroFontFamily === "arabic" ? "var(--font-arabic)" : undefined,
+  };
+
   return (
-    <section className="hero" id="about">
-      <div className="title-block">
+    <section className="hero" id="about" dir={settings.heroDirection}>
+      <div className="title-block" style={{ textAlign: settings.heroTextAlign }}>
         <span>
           NAME: <b>{settings.heroName}</b>
         </span>
@@ -21,13 +27,21 @@ export function Hero({ settings, projectCount }: { settings: SiteSettings; proje
           REV: <b>{settings.heroRev}</b>
         </span>
       </div>
-      <h1>
+      <h1 style={headlineStyle}>
         {settings.heroPrefix}
         <em>{settings.heroEmphasis}</em>
         {settings.heroSuffix}
       </h1>
-      <p className="lede">{settings.heroLede}</p>
-      <div className="hero-stats">
+      <p
+        className="lede"
+        style={{
+          textAlign: settings.heroTextAlign,
+          fontFamily: settings.heroFontFamily === "arabic" ? "var(--font-arabic)" : undefined,
+        }}
+      >
+        {settings.heroLede}
+      </p>
+      <div className="hero-stats" style={{ textAlign: settings.heroTextAlign }}>
         {stats.map((stat) => (
           <div className="hero-stat" key={stat.label}>
             <div className="num">{stat.num}</div>
